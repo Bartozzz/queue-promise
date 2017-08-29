@@ -1,5 +1,7 @@
 # queue-promise
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Bartozzz/queue-promise.svg)](https://greenkeeper.io/)
+
 > A simple and small library for promise-based queues.
 
 ## Installation
