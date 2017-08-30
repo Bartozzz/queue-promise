@@ -29,7 +29,6 @@
         "babel-plugin-transform-class-properties": "^6.24.1"
     },
     "scripts": {
-        "test": "mocha",
         "clean": "rm -rf dist",
         "build": "babel src -d dist",
         "watch": "babel src -d dist -w",
