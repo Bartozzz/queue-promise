@@ -1,8 +1,14 @@
-# queue-promise
+<div align="center">
+  <h1>queue-promise</h1>
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/Bartozzz/queue-promise.svg)](https://greenkeeper.io/)
+[![Build Status](https://img.shields.io/travis/Bartozzz/queue-promise.svg)](https://travis-ci.org/Bartozzz/queue-promise/)
+[![npm version](https://img.shields.io/npm/v/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
+[![npm downloads](https://img.shields.io/npm/dt/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
+  <br>
 
-> A simple and small library for promise-based queues.
+A simple and small library for promise-based queues.
+</div>
 
 ## Installation
 
@@ -10,24 +16,10 @@
 $ npm install queue-promise
 ```
 
-This module uses several ECMAScript 2015 (ES6) features. You'll need the latest Node.js version in order to make it work correctly. You might need to run the script with the `--harmony` flag, for example:
-
-```bash
-$ node --harmony index.js
-```
-
 ## Usage
 
 ```javascript
-"use strict";
-
-const Queue = require( "./src/index.js" );
-const debug = ( msg, err ) => {
-    return () => new Promise( ( resolve, reject ) => {
-        if ( err ) reject( `Error: ${msg}` );
-        resolve( `Success: ${msg}` );
-    } );
-};
+import Queue from "queue-promise";
 
 const q = new Queue( {
     concurrency : 1,
@@ -37,21 +29,11 @@ const q = new Queue( {
 q.on( "resolve", ...data => console.log( data ) );
 q.on( "reject", error => console.error( error ) );
 
-q.add( debug( "Index 0" ) );
-q.add( debug( "Index 1", true ) );
-q.add( debug( "Index 2", true ) );
-q.add( debug( "Index 3" ) );
-
+q.add( asyncTaskA ); // resolved/rejected after 0s
+q.add( asyncTaskB ); // resolved/rejected after 2s
+q.add( asyncTaskC ); // resolved/rejected after 4s
+q.add( asyncTaskD ); // resolved/rejected after 6s
 q.start();
-```
-
-Generated output:
-
-```   
-[ 'Success: Index 0' ]  < after 2s
-Error: Index 1          < after 4s
-Error: Index 2          < after 6s
-[ 'Success: Index 3' ]  < after 8s
 ```
 
 ## API
@@ -60,8 +42,8 @@ Error: Index 2          < after 6s
 
 Create a new `Queue` instance with optionally injected options.
 
-| Option      | Default | Description                                   |
-|:------------|:--------|:----------------------------------------------|
+| Option      | Default | Description                                       |
+|:------------|:--------|:--------------------------------------------------|
 | concurrency | 10      | How many promises can be handled at the same time |
 | interval    | 250     | How often should new promises be handled (in ms)  |
 
