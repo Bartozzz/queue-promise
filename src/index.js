@@ -111,8 +111,8 @@ export default class Queue extends EventEmitter {
     }
 
     add( promise ) {
-        if ( typeof promise !== "function" ) {
-            throw new Error( `You must provide a valid function, not ${typeof promise}.` );
+        if ( Promise.resolve( promise ) == promise ) {
+            throw new Error( `You must provide a valid Promise, not ${typeof promise}.` );
         }
 
         this.collection.set( this.unique++, promise );
