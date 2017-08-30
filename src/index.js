@@ -81,7 +81,7 @@ export default class Queue extends EventEmitter {
                         this.next();
                     } )
             } );
-        }, this.options.interval );
+        }, parseInt( this.options.interval ) );
     }
 
     /**
