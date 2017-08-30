@@ -16,10 +16,6 @@
     "bugs": {
         "url": "https://github.com/Bartozzz/queue-promise/issues"
     },
-    "dependencies": {
-        "event-emitter": "latest",
-        "basic-collection": "latest"
-    },
     "devDependencies": {
         "mocha": "^3.5.0",
         "babel": "^6.23.0",

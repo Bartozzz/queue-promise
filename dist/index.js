@@ -4,9 +4,17 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _typeof2 = require("babel-runtime/helpers/typeof");
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 var _extends2 = require("babel-runtime/helpers/extends");
 
 var _extends3 = _interopRequireDefault(_extends2);
+
+var _map = require("babel-runtime/core-js/map");
+
+var _map2 = _interopRequireDefault(_map);
 
 var _getPrototypeOf = require("babel-runtime/core-js/object/get-prototype-of");
 
@@ -28,18 +36,14 @@ var _inherits2 = require("babel-runtime/helpers/inherits");
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
-var _eventEmitter = require("event-emitter");
+var _events = require("events");
 
-var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
-
-var _requestCollection = require("./collection/requestCollection");
-
-var _requestCollection2 = _interopRequireDefault(_requestCollection);
+var _events2 = _interopRequireDefault(_events);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Queue = function (_RequestCollection) {
-    (0, _inherits3.default)(Queue, _RequestCollection);
+var Queue = function (_EventEmitter) {
+    (0, _inherits3.default)(Queue, _EventEmitter);
 
     /**
      * @param   {object}    options
@@ -53,8 +57,9 @@ var Queue = function (_RequestCollection) {
      * @type    {boolean}
      */
 
+
     /**
-     * @type    {EventEmitter}
+     * @type    {number}
      */
     function Queue() {
         var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -62,7 +67,8 @@ var Queue = function (_RequestCollection) {
 
         var _this = (0, _possibleConstructorReturn3.default)(this, (Queue.__proto__ || (0, _getPrototypeOf2.default)(Queue)).call(this));
 
-        _this.events = new _eventEmitter2.default();
+        _this.collection = new _map2.default();
+        _this.unique = 0;
         _this.current = 0;
         _this.started = false;
         _this.interval = null;
@@ -95,6 +101,10 @@ var Queue = function (_RequestCollection) {
      * @type    {number}
      */
 
+    /**
+     * @type    {Map}
+     */
+
 
     (0, _createClass3.default)(Queue, [{
         key: "start",
@@ -105,13 +115,13 @@ var Queue = function (_RequestCollection) {
                 return;
             }
 
-            this.events.emit("start");
+            this.emit("start");
 
             this.started = true;
             this.interval = setInterval(function () {
-                _this2.events.emit("tick");
+                _this2.emit("tick");
 
-                _this2.each(function (promise, id) {
+                _this2.collection.forEach(function (promise, id) {
                     if (_this2.current + 1 > _this2.options.concurrency) {
                         return;
                     }
@@ -120,15 +130,13 @@ var Queue = function (_RequestCollection) {
                     _this2.remove(id);
 
                     promise().then(function () {
-                        var _events;
-
                         for (var _len = arguments.length, output = Array(_len), _key = 0; _key < _len; _key++) {
                             output[_key] = arguments[_key];
                         }
 
-                        (_events = _this2.events).emit.apply(_events, ["resolve"].concat(output));
+                        _this2.emit.apply(_this2, ["resolve"].concat(output));
                     }).catch(function (error) {
-                        _this2.events.emit("reject", error);
+                        _this2.emit("reject", error);
                     }).then(function () {
                         _this2.next();
                     });
@@ -146,7 +154,7 @@ var Queue = function (_RequestCollection) {
     }, {
         key: "stop",
         value: function stop() {
-            this.events.emit("stop");
+            this.emit("stop");
 
             this.started = false;
             this.interval = clearInterval(this.interval);
@@ -162,28 +170,28 @@ var Queue = function (_RequestCollection) {
     }, {
         key: "next",
         value: function next() {
-            if (--this.current === 0 && this.size === 0) {
-                this.events.emit("end");
+            if (--this.current === 0 && this.collection.size === 0) {
+                this.emit("end");
                 this.stop();
             }
         }
-
-        /**
-         * Sets a `callback` for an `event`.
-         *
-         * @param   {string}    event       - event name
-         * @param   {function}  callback    - event callback
-         * @access  public
-         */
-
     }, {
-        key: "on",
-        value: function on(event, callback) {
-            this.events.on(event, callback);
+        key: "add",
+        value: function add(promise) {
+            if (typeof promise !== "function") {
+                throw new Error("You must provide a valid function, not " + (typeof promise === "undefined" ? "undefined" : (0, _typeof3.default)(promise)) + ".");
+            }
+
+            this.collection.set(this.unique++, promise);
+        }
+    }, {
+        key: "remove",
+        value: function remove(key) {
+            this.collection.delete(key);
         }
     }]);
     return Queue;
-}(_requestCollection2.default);
+}(_events2.default);
 
 exports.default = Queue;
 module.exports = exports["default"];

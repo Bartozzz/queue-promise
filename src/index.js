@@ -1,11 +1,15 @@
-import EventEmitter      from "event-emitter";
-import RequestCollection from "./collection/requestCollection";
+import EventEmitter from "events";
 
-export default class Queue extends RequestCollection {
+export default class Queue extends EventEmitter {
     /**
-     * @type    {EventEmitter}
+     * @type    {Map}
      */
-    events = new EventEmitter;
+    collection = new Map;
+
+    /**
+     * @type    {number}
+     */
+    unique = 0;
 
     /**
      * @type    {number}
@@ -52,13 +56,13 @@ export default class Queue extends RequestCollection {
             return;
         }
 
-        this.events.emit( "start" );
+        this.emit( "start" );
 
         this.started  = true;
         this.interval = setInterval( () => {
-            this.events.emit( "tick" );
+            this.emit( "tick" );
 
-            this.each( ( promise, id ) => {
+            this.collection.forEach( ( promise, id ) => {
                 if ( this.current + 1 > this.options.concurrency ) {
                     return;
                 }
@@ -68,10 +72,10 @@ export default class Queue extends RequestCollection {
 
                 promise()
                     .then( ( ...output ) => {
-                        this.events.emit( "resolve", ...output );
+                        this.emit( "resolve", ...output );
                     } )
                     .catch( error => {
-                        this.events.emit( "reject", error );
+                        this.emit( "reject", error );
                     } )
                     .then( () => {
                         this.next();
@@ -87,7 +91,7 @@ export default class Queue extends RequestCollection {
      * @access  public
      */
     stop() {
-        this.events.emit( "stop" );
+        this.emit( "stop" );
 
         this.started  = false;
         this.interval = clearInterval( this.interval );
@@ -100,20 +104,21 @@ export default class Queue extends RequestCollection {
      * @access  private
      */
     next() {
-        if ( --this.current === 0 && this.size === 0 ) {
-            this.events.emit( "end" );
+        if ( --this.current === 0 && this.collection.size === 0 ) {
+            this.emit( "end" );
             this.stop();
         }
     }
 
-    /**
-     * Sets a `callback` for an `event`.
-     *
-     * @param   {string}    event       - event name
-     * @param   {function}  callback    - event callback
-     * @access  public
-     */
-    on( event, callback ) {
-        this.events.on( event, callback );
+    add( promise ) {
+        if ( typeof promise !== "function" ) {
+            throw new Error( `You must provide a valid function, not ${typeof promise}.` );
+        }
+
+        this.collection.set( this.unique++, promise );
+    }
+
+    remove( key ) {
+        this.collection.delete( key );
     }
 }
