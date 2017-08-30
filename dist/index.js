@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _toConsumableArray2 = require("babel-runtime/helpers/toConsumableArray");
-
-var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
-
 var _extends2 = require("babel-runtime/helpers/extends");
 
 var _extends3 = _interopRequireDefault(_extends2);
@@ -116,8 +112,6 @@ var Queue = function (_RequestCollection) {
                 _this2.events.emit("tick");
 
                 _this2.each(function (promise, id) {
-                    var _promise;
-
                     if (_this2.current + 1 > _this2.options.concurrency) {
                         return;
                     }
@@ -125,11 +119,15 @@ var Queue = function (_RequestCollection) {
                     _this2.current++;
                     _this2.remove(id);
 
-                    (_promise = promise()).then.apply(_promise, (0, _toConsumableArray3.default)(function (output) {
+                    promise().then(function () {
                         var _events;
 
-                        (_events = _this2.events).emit.apply(_events, ["resolve"].concat((0, _toConsumableArray3.default)(output)));
-                    })).catch(function (error) {
+                        for (var _len = arguments.length, output = Array(_len), _key = 0; _key < _len; _key++) {
+                            output[_key] = arguments[_key];
+                        }
+
+                        (_events = _this2.events).emit.apply(_events, ["resolve"].concat(output));
+                    }).catch(function (error) {
                         _this2.events.emit("reject", error);
                     }).then(function () {
                         _this2.next();

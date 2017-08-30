@@ -67,7 +67,7 @@ export default class Queue extends RequestCollection {
                 this.remove( id );
 
                 promise()
-                    .then( ...output => {
+                    .then( ( ...output ) => {
                         this.events.emit( "resolve", ...output );
                     } )
                     .catch( error => {
