@@ -1,6 +1,6 @@
 {
     "name": "queue-promise",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "keywords": [
         "queue",
         "promise"
@@ -15,6 +15,9 @@
     },
     "bugs": {
         "url": "https://github.com/Bartozzz/queue-promise/issues"
+    },
+    "dependencies": {
+        "babel-runtime": "^6.26.0"
     },
     "devDependencies": {
         "mocha": "^3.5.0",
