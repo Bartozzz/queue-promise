@@ -44,8 +44,8 @@ Create a new `Queue` instance with optionally injected options.
 
 | Option      | Default | Description                                       |
 |:------------|:--------|:--------------------------------------------------|
-| concurrency | 10      | How many promises can be handled at the same time |
-| interval    | 250     | How often should new promises be handled (in ms)  |
+| concurrency | 5       | How many promises can be handled at the same time |
+| interval    | 500     | How often should new promises be handled (in ms)  |
 
 #### **public** .add( promise )
 
