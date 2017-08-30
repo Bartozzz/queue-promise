@@ -26,7 +26,7 @@ const q = new Queue( {
     interval    : 2000
 } );
 
-q.on( "resolve", ...data => console.log( data ) );
+q.on( "resolve", data => console.log( data ) );
 q.on( "reject", error => console.error( error ) );
 
 q.add( asyncTaskA ); // resolved/rejected after 0s
@@ -38,7 +38,7 @@ q.start();
 
 ## API
 
-#### new Queue( options )
+#### `new Queue( options )`
 
 Create a new `Queue` instance with optionally injected options.
 
@@ -47,34 +47,22 @@ Create a new `Queue` instance with optionally injected options.
 | concurrency | 5       | How many promises can be handled at the same time |
 | interval    | 500     | How often should new promises be handled (in ms)  |
 
-#### **public** .add( promise )
+#### **public** `.add( promise )`
 
 Adds a promise to the queue.
 
-#### **public** .start()
+#### **public** `.start()`
 
 Starts the queue.
 
-#### **public** .stop()
+#### **public** `.stop()`
 
 Stops the queue.
 
-#### **private** .next()
+#### **private** `.next()`
 
 Goes to the next request and stops the loop if there is no requests left.
 
-#### **public** .on( event, callback )
+#### **public** `.on( event, callback )`
 
-Sets a `callback` for an `event`. You can set callback for those events:
-- `start`
-- `stop`
-- `tick`
-- `resolve[ ...output ]`
-- `reject[ message ]`
-- `end`
-
-## Tests
-
-```bash
-$ npm test
-```
+Sets a `callback` for an `event`. You can set callback for those events: `start`, `stop`, `tick`, `resolve`, `reject`, `end`.
