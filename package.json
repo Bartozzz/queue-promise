@@ -1,33 +1,29 @@
 {
-    "name"          : "queue-promise",
-    "version"       : "0.0.1",
-    "keywords"      : [ "queue", "promise" ],
-    "description"   : "A simple and small library for promise-based queues",
-
-    "author"    : "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
-    "license"   : "MIT",
-
-    "main"  : "src/index.js",
-
-    "repository" : {
-        "type" : "git",
-        "url"  : "https://github.com/Bartozzz/queue-promise.git"
+    "name": "queue-promise",
+    "version": "0.0.1",
+    "keywords": [
+        "queue",
+        "promise"
+    ],
+    "description": "A simple and small library for promise-based queues",
+    "author": "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
+    "license": "MIT",
+    "main": "src/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Bartozzz/queue-promise.git"
     },
-
-    "bugs" : {
-        "url" : "https://github.com/Bartozzz/queue-promise/issues"
+    "bugs": {
+        "url": "https://github.com/Bartozzz/queue-promise/issues"
     },
-
-    "dependencies" : {
-        "event-emitter"    : "latest",
-        "basic-collection" : "latest"
+    "dependencies": {
+        "event-emitter": "latest",
+        "basic-collection": "latest"
     },
-
-    "devDependencies" : {
-        "mocha" : "latest"
+    "devDependencies": {
+        "mocha": "^3.5.0"
     },
-
-    "scripts" : {
-        "test" : "mocha"
+    "scripts": {
+        "test": "mocha"
     }
 }
