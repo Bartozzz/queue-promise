@@ -1,68 +1,72 @@
 "use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _typeof2 = require("babel-runtime/helpers/typeof");
 
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _typeof3 = _interopRequireDefault(_typeof2);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _getPrototypeOf = require("babel-runtime/core-js/object/get-prototype-of");
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
 
-var BasicCollection = require("basic-collection");
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-/**
- * Request collection.
- *
- * @author    Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (//laniewski.me)
- * @copyright Copyright (c) 2016 Łaniewski Bartosz
- * @license   MIT
- */
+var _createClass2 = require("babel-runtime/helpers/createClass");
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require("babel-runtime/helpers/possibleConstructorReturn");
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _get2 = require("babel-runtime/helpers/get");
+
+var _get3 = _interopRequireDefault(_get2);
+
+var _inherits2 = require("babel-runtime/helpers/inherits");
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _basicCollection = require("basic-collection");
+
+var _basicCollection2 = _interopRequireDefault(_basicCollection);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var RequestCollection = function (_BasicCollection) {
-    _inherits(RequestCollection, _BasicCollection);
+    (0, _inherits3.default)(RequestCollection, _BasicCollection);
 
-    /**
-     * Create a new `Collection` instance with optionally injected parameters.
-     *
-     * @param   array   parameters
-     * @access  public
-     */
-    function RequestCollection(parameters) {
-        _classCallCheck(this, RequestCollection);
+    function RequestCollection() {
+        var _ref;
 
-        var _this = _possibleConstructorReturn(this, (RequestCollection.__proto__ || Object.getPrototypeOf(RequestCollection)).call(this, parameters));
+        var _temp, _this, _ret;
 
-        _this.index = 0;
-        return _this;
+        (0, _classCallCheck3.default)(this, RequestCollection);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = RequestCollection.__proto__ || (0, _getPrototypeOf2.default)(RequestCollection)).call.apply(_ref, [this].concat(args))), _this), _this.index = 0, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
     }
 
-    /**
-     * Set an attribute for the current collection.
-     *
-     * @param   function    request
-     * @throws  Request must be a valid Promise function
-     * @access  public
-     */
-
-
-    _createClass(RequestCollection, [{
+    (0, _createClass3.default)(RequestCollection, [{
         key: "add",
         value: function add(request) {
             if (typeof request !== "function") {
-                throw new Error("You must provide a valid function, not " + (typeof request === "undefined" ? "undefined" : _typeof(request)) + ".");
+                throw new Error("You must provide a valid function, not " + (typeof request === "undefined" ? "undefined" : (0, _typeof3.default)(request)) + ".");
             }
 
-            _get(RequestCollection.prototype.__proto__ || Object.getPrototypeOf(RequestCollection.prototype), "set", this).call(this, this.index++, request);
+            (0, _get3.default)(RequestCollection.prototype.__proto__ || (0, _getPrototypeOf2.default)(RequestCollection.prototype), "set", this).call(this, this.index++, request);
         }
     }]);
-
     return RequestCollection;
-}(BasicCollection);
+}(_basicCollection2.default);
 
-;
-
-module.exports = RequestCollection;
+exports.default = RequestCollection;
+module.exports = exports["default"];

@@ -1,43 +1,50 @@
-"use strict";
+import EventEmitter      from "event-emitter";
+import RequestCollection from "./collection/requestCollection";
 
-const EventEmitter      = require( "event-emitter" );
-const RequestCollection = require( "./collection/requestCollection" );
-
-/**
- * Queue class for promises.
- *
- * @author    Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (//laniewski.me)
- * @copyright Copyright (c) 2016 Łaniewski Bartosz
- * @license   MIT
- */
-
-class Queue extends RequestCollection {
+export default class Queue extends RequestCollection {
     /**
-     * Create a new `Queue` instance with optionally injected options.
-     *
-     * @param   object  options
-     * @param   int     options.concurrency
-     * @param   int     options.interval
+     * @type    {EventEmitter}
+     */
+    events = new EventEmitter;
+
+    /**
+     * @type    {number}
+     */
+    current = 0;
+
+    /**
+     * @type    {boolean}
+     */
+    started = false;
+
+    /**
+     * @type    {Interval}
+     */
+    interval = null;
+
+    /**
+     * @param   {object}    options
+     * @param   {number}    options.concurrency - how many promises can be handled at the same time
+     * @param   {number}    options.interval    - how often should new promises be handled (in ms)
      * @access  public
      */
-    constructor( options ) {
+    constructor( options = {} ) {
         super();
 
-        this.options = Object.assign( {
+        this.options = {
             concurrency : 5,
-            interval    : 500
-        }, options );
-
-        this.events   = new EventEmitter;
-        this.current  = 0;
-        this.started  = false;
-        this.interval = null;
+            interval    : 500,
+            ...options
+        };
     }
 
     /**
      * Starts the queue.
      *
-     * @emits   start|tick|request|error
+     * @emits   start
+     * @emits   tick
+     * @emits   request
+     * @emits   error
      * @access  public
      */
     start() {
@@ -60,14 +67,15 @@ class Queue extends RequestCollection {
                 this.remove( id );
 
                 promise()
-                    .then( ( ...output ) => {
+                    .then( ...output => {
                         this.events.emit( "resolve", ...output );
+                    } )
+                    .catch( error => {
+                        this.events.emit( "reject", error );
+                    } )
+                    .then( () => {
                         this.next();
                     } )
-                    .catch( ( error ) => {
-                        this.events.emit( "reject", error );
-                        this.next();
-                    } );
             } );
         }, this.options.interval );
     }
@@ -101,13 +109,11 @@ class Queue extends RequestCollection {
     /**
      * Sets a `callback` for an `event`.
      *
-     * @param   event       Event name
-     * @param   callback    Event callback
+     * @param   {string}    event       - event name
+     * @param   {function}  callback    - event callback
      * @access  public
      */
     on( event, callback ) {
         this.events.on( event, callback );
     }
-};
-
-module.exports = Queue;
+}
