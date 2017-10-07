@@ -4,41 +4,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _typeof3 = _interopRequireDefault(_typeof2);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _promise = require("babel-runtime/core-js/promise");
-
-var _promise2 = _interopRequireDefault(_promise);
-
-var _extends2 = require("babel-runtime/helpers/extends");
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _map = require("babel-runtime/core-js/map");
-
-var _map2 = _interopRequireDefault(_map);
-
-var _getPrototypeOf = require("babel-runtime/core-js/object/get-prototype-of");
-
-var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _possibleConstructorReturn2 = require("babel-runtime/helpers/possibleConstructorReturn");
-
-var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
-
-var _inherits2 = require("babel-runtime/helpers/inherits");
-
-var _inherits3 = _interopRequireDefault(_inherits2);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _events = require("events");
 
@@ -46,8 +16,14 @@ var _events2 = _interopRequireDefault(_events);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var Queue = function (_EventEmitter) {
-    (0, _inherits3.default)(Queue, _EventEmitter);
+    _inherits(Queue, _EventEmitter);
 
     /**
      * Initializes a new Queue instance with provided options.
@@ -73,17 +49,18 @@ var Queue = function (_EventEmitter) {
      */
     function Queue() {
         var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        (0, _classCallCheck3.default)(this, Queue);
+
+        _classCallCheck(this, Queue);
 
         // Default options:
-        var _this = (0, _possibleConstructorReturn3.default)(this, (Queue.__proto__ || (0, _getPrototypeOf2.default)(Queue)).call(this));
+        var _this = _possibleConstructorReturn(this, (Queue.__proto__ || Object.getPrototypeOf(Queue)).call(this));
 
-        _this.collection = new _map2.default();
+        _this.collection = new Map();
         _this.unique = 0;
         _this.current = 0;
         _this.started = false;
         _this.interval = null;
-        _this.options = (0, _extends3.default)({
+        _this.options = _extends({
             concurrency: 5,
             interval: 500
         }, options);
@@ -121,7 +98,7 @@ var Queue = function (_EventEmitter) {
      */
 
 
-    (0, _createClass3.default)(Queue, [{
+    _createClass(Queue, [{
         key: "start",
         value: function start() {
             var _this2 = this;
@@ -202,8 +179,8 @@ var Queue = function (_EventEmitter) {
     }, {
         key: "add",
         value: function add(promise) {
-            if (_promise2.default.resolve(promise) == promise) {
-                throw new Error("You must provide a valid Promise, not " + (typeof promise === "undefined" ? "undefined" : (0, _typeof3.default)(promise)) + ".");
+            if (Promise.resolve(promise) == promise) {
+                throw new Error("You must provide a valid Promise, not " + (typeof promise === "undefined" ? "undefined" : _typeof(promise)) + ".");
             }
 
             this.collection.set(this.unique++, promise);
@@ -222,6 +199,7 @@ var Queue = function (_EventEmitter) {
             return this.collection.delete(key);
         }
     }]);
+
     return Queue;
 }(_events2.default);
 

@@ -3,7 +3,11 @@
     "version": "0.1.2",
     "keywords": [
         "queue",
-        "promise"
+        "queue-tasks",
+        "queue-request",
+        "promise",
+        "promise-chain",
+        "promise-queue"
     ],
     "description": "A simple and small library for promise-based queues",
     "author": "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
@@ -24,12 +28,9 @@
         "babel": "^6.23.0",
         "babel-cli": "^6.26.0",
         "babel-preset-es2015": "^6.24.1",
-        "babel-preset-es2016": "^6.24.1",
-        "babel-preset-es2017": "^6.24.1",
-        "babel-preset-stage-0": "^6.24.1",
         "babel-plugin-add-module-exports": "^0.2.1",
-        "babel-plugin-transform-runtime": "^6.23.0",
-        "babel-plugin-transform-class-properties": "^6.24.1"
+        "babel-plugin-transform-class-properties": "^6.24.1",
+        "babel-plugin-transform-object-rest-spread": "^6.26.0"
     },
     "scripts": {
         "clean": "rm -rf dist",
