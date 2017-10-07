@@ -1,7 +1,9 @@
+// @flow
+
 import EventEmitter from "events";
 
 /**
- *
+ * A simple and small library for promise-based queues.
  */
 export default class Queue extends EventEmitter {
     /**
@@ -9,35 +11,42 @@ export default class Queue extends EventEmitter {
      *
      * @type    {Map}
      */
-    collection = new Map;
+    collection: Map<number, () => Promise<*>> = new Map;
 
     /**
      * Used to generate unique id for each promise.
      *
      * @type    {number}
      */
-    unique = 0;
+    unique: number = 0;
 
     /**
      * Amount of promises currently handled.
      *
      * @type    {number}
      */
-    current = 0;
+    current: number = 0;
+
+    /**
+     * Queue config.
+     *
+     * @type    {Object}
+     */
+    options: Object = {};
 
     /**
      * Whenever the queue has started.
      *
      * @type    {boolean}
      */
-    started = false;
+    started: boolean = false;
 
     /**
      * Queue interval.
      *
-     * @type    {Interval}
+     * @type    {number}
      */
-    interval = null;
+    interval: number = 0;
 
     /**
      * Initializes a new Queue instance with provided options.
@@ -47,9 +56,8 @@ export default class Queue extends EventEmitter {
      *                                          handled at the same time
      * @param   {number}    options.interval    how often should new promises be
      *                                          handled (in ms)
-     * @access  public
      */
-    constructor(options = {}) {
+    constructor(options: Object = {}): void {
         super();
 
         // Default options:
@@ -67,9 +75,8 @@ export default class Queue extends EventEmitter {
      * @emits   tick
      * @emits   request
      * @emits   error
-     * @access  public
      */
-    start() {
+    start(): void {
         if (this.started) {
             return;
         }
@@ -107,22 +114,22 @@ export default class Queue extends EventEmitter {
      * Stops the queue.
      *
      * @emits   stop
-     * @access  public
      */
-    stop() {
+    stop(): void {
         this.emit("stop");
 
+        clearInterval(this.interval);
+
         this.started = false;
-        this.interval = clearInterval(this.interval);
+        this.interval = 0;
     }
 
     /**
      * Goes to the next request and stops the loop if there is no requests left.
      *
      * @emits   end
-     * @access  private
      */
-    next() {
+    next(): void {
         if (--this.current === 0 && this.collection.size === 0) {
             this.emit("end");
             this.stop();
@@ -135,7 +142,7 @@ export default class Queue extends EventEmitter {
      * @param   {Promise}   promise Promise to add to the queue
      * @throws  {Error}             when the promise is not a function
      */
-    add(promise) {
+    add(promise: () => Promise<*>): void {
         if (Promise.resolve(promise) == promise) {
             throw new Error(
                 `You must provide a valid Promise, not ${typeof promise}.`
@@ -148,10 +155,10 @@ export default class Queue extends EventEmitter {
     /**
      * Removes a promise from the queue.
      *
-     * @param   {number}    key     - Promise id
-     * @return  {bool}
+     * @param   {number}    key     Promise id
+     * @return  {boolean}
      */
-    remove(key) {
+    remove(key: number): boolean {
         return this.collection.delete(key);
     }
 }

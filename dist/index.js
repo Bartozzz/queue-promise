@@ -22,6 +22,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+/**
+ * A simple and small library for promise-based queues.
+ */
 var Queue = function (_EventEmitter) {
     _inherits(Queue, _EventEmitter);
 
@@ -29,9 +32,10 @@ var Queue = function (_EventEmitter) {
      * Initializes a new Queue instance with provided options.
      *
      * @param   {object}    options
-     * @param   {number}    options.concurrency - how many promises can be handled at the same time
-     * @param   {number}    options.interval    - how often should new promises be handled (in ms)
-     * @access  public
+     * @param   {number}    options.concurrency how many promises can be
+     *                                          handled at the same time
+     * @param   {number}    options.interval    how often should new promises be
+     *                                          handled (in ms)
      */
 
 
@@ -43,9 +47,15 @@ var Queue = function (_EventEmitter) {
 
 
     /**
-     * Used to generate unique id for each promise.
+     * Amount of promises currently handled.
      *
      * @type    {number}
+     */
+
+    /**
+     * A collection to store unresolved promises in.
+     *
+     * @type    {Map}
      */
     function Queue() {
         var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -58,8 +68,9 @@ var Queue = function (_EventEmitter) {
         _this.collection = new Map();
         _this.unique = 0;
         _this.current = 0;
+        _this.options = {};
         _this.started = false;
-        _this.interval = null;
+        _this.interval = 0;
         _this.options = _extends({
             concurrency: 5,
             interval: 500
@@ -74,27 +85,27 @@ var Queue = function (_EventEmitter) {
      * @emits   tick
      * @emits   request
      * @emits   error
-     * @access  public
      */
 
 
     /**
      * Queue interval.
      *
-     * @type    {Interval}
-     */
-
-
-    /**
-     * Amount of promises currently handled.
-     *
      * @type    {number}
      */
 
+
     /**
-     * A collection to store unresolved promises in.
+     * Queue config.
      *
-     * @type    {Map}
+     * @type    {Object}
+     */
+
+
+    /**
+     * Used to generate unique id for each promise.
+     *
+     * @type    {number}
      */
 
 
@@ -141,7 +152,6 @@ var Queue = function (_EventEmitter) {
          * Stops the queue.
          *
          * @emits   stop
-         * @access  public
          */
 
     }, {
@@ -149,15 +159,16 @@ var Queue = function (_EventEmitter) {
         value: function stop() {
             this.emit("stop");
 
+            clearInterval(this.interval);
+
             this.started = false;
-            this.interval = clearInterval(this.interval);
+            this.interval = 0;
         }
 
         /**
          * Goes to the next request and stops the loop if there is no requests left.
          *
          * @emits   end
-         * @access  private
          */
 
     }, {
@@ -172,8 +183,8 @@ var Queue = function (_EventEmitter) {
         /**
          * Adds a promise to the queue.
          *
-         * @param   {Promise}   promise     - Promise to add to the queue
-         * @throws  {Error}                 - when the promise is not a function
+         * @param   {Promise}   promise Promise to add to the queue
+         * @throws  {Error}             when the promise is not a function
          */
 
     }, {
@@ -189,8 +200,8 @@ var Queue = function (_EventEmitter) {
         /**
          * Removes a promise from the queue.
          *
-         * @param   {number}    key     - Promise id
-         * @return  {bool}
+         * @param   {number}    key     Promise id
+         * @return  {boolean}
          */
 
     }, {
