@@ -1,5 +1,8 @@
 import EventEmitter from "events";
 
+/**
+ *
+ */
 export default class Queue extends EventEmitter {
     /**
      * A collection to store unresolved promises in.
@@ -40,18 +43,20 @@ export default class Queue extends EventEmitter {
      * Initializes a new Queue instance with provided options.
      *
      * @param   {object}    options
-     * @param   {number}    options.concurrency - how many promises can be handled at the same time
-     * @param   {number}    options.interval    - how often should new promises be handled (in ms)
+     * @param   {number}    options.concurrency how many promises can be
+     *                                          handled at the same time
+     * @param   {number}    options.interval    how often should new promises be
+     *                                          handled (in ms)
      * @access  public
      */
-    constructor( options = {} ) {
+    constructor(options = {}) {
         super();
 
         // Default options:
         this.options = {
-            concurrency : 5,
-            interval    : 500,
-            ...options
+            concurrency: 5,
+            interval: 500,
+            ...options,
         };
     }
 
@@ -65,37 +70,37 @@ export default class Queue extends EventEmitter {
      * @access  public
      */
     start() {
-        if ( this.started ) {
+        if (this.started) {
             return;
         }
 
-        this.emit( "start" );
+        this.emit("start");
 
-        this.started  = true;
-        this.interval = setInterval( () => {
-            this.emit( "tick" );
+        this.started = true;
+        this.interval = setInterval(() => {
+            this.emit("tick");
 
-            this.collection.forEach( ( promise, id ) => {
+            this.collection.forEach((promise, id) => {
                 // Maximum amount of parallel concurrencies:
-                if ( this.current + 1 > this.options.concurrency ) {
+                if (this.current + 1 > this.options.concurrency) {
                     return;
                 }
 
                 this.current++;
-                this.remove( id );
+                this.remove(id);
 
                 promise()
-                    .then( ( ...output ) => {
-                        this.emit( "resolve", ...output );
-                    } )
-                    .catch( error => {
-                        this.emit( "reject", error );
-                    } )
-                    .then( () => {
+                    .then((...output) => {
+                        this.emit("resolve", ...output);
+                    })
+                    .catch((error) => {
+                        this.emit("reject", error);
+                    })
+                    .then(() => {
                         this.next();
-                    } );
-            } );
-        }, parseInt( this.options.interval ) );
+                    });
+            });
+        }, parseInt(this.options.interval));
     }
 
     /**
@@ -105,10 +110,10 @@ export default class Queue extends EventEmitter {
      * @access  public
      */
     stop() {
-        this.emit( "stop" );
+        this.emit("stop");
 
-        this.started  = false;
-        this.interval = clearInterval( this.interval );
+        this.started = false;
+        this.interval = clearInterval(this.interval);
     }
 
     /**
@@ -118,8 +123,8 @@ export default class Queue extends EventEmitter {
      * @access  private
      */
     next() {
-        if ( --this.current === 0 && this.collection.size === 0 ) {
-            this.emit( "end" );
+        if (--this.current === 0 && this.collection.size === 0) {
+            this.emit("end");
             this.stop();
         }
     }
@@ -127,15 +132,17 @@ export default class Queue extends EventEmitter {
     /**
      * Adds a promise to the queue.
      *
-     * @param   {Promise}   promise     - Promise to add to the queue
-     * @throws  {Error}                 - when the promise is not a function
+     * @param   {Promise}   promise Promise to add to the queue
+     * @throws  {Error}             when the promise is not a function
      */
-    add( promise ) {
-        if ( Promise.resolve( promise ) == promise ) {
-            throw new Error( `You must provide a valid Promise, not ${typeof promise}.` );
+    add(promise) {
+        if (Promise.resolve(promise) == promise) {
+            throw new Error(
+                `You must provide a valid Promise, not ${typeof promise}.`
+            );
         }
 
-        this.collection.set( this.unique++, promise );
+        this.collection.set(this.unique++, promise);
     }
 
     /**
@@ -144,7 +151,7 @@ export default class Queue extends EventEmitter {
      * @param   {number}    key     - Promise id
      * @return  {bool}
      */
-    remove( key ) {
-        return this.collection.delete( key );
+    remove(key) {
+        return this.collection.delete(key);
     }
 }
