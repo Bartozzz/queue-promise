@@ -24,7 +24,7 @@
         "babel-runtime": "^6.26.0"
     },
     "devDependencies": {
-        "flow-bin": "^0.57.1",
+        "flow-bin": "^0.58.0",
         "mocha": "^4.0.0",
         "babel": "^6.23.0",
         "babel-cli": "^6.26.0",
