@@ -1,50 +1,51 @@
 {
-    "name": "queue-promise",
-    "version": "1.0.0",
-    "keywords": [
-        "queue",
-        "queue-tasks",
-        "queue-request",
-        "promise",
-        "promise-chain",
-        "promise-queue"
-    ],
-    "description": "A simple and small library for promise-based queues",
-    "author": "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
-    "license": "MIT",
-    "main": "dist/index.js",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Bartozzz/queue-promise.git"
-    },
-    "bugs": {
-        "url": "https://github.com/Bartozzz/queue-promise/issues"
-    },
-    "dependencies": {
-        "babel-runtime": "^6.26.0"
-    },
-    "devDependencies": {
-        "flow-bin": "^0.63.0",
-        "mocha": "^4.0.0",
-        "babel": "^6.23.0",
-        "babel-cli": "^6.26.0",
-        "babel-eslint": "^8.0.1",
-        "babel-preset-flow": "^6.23.0",
-        "babel-preset-es2015": "^6.24.1",
-        "babel-plugin-add-module-exports": "^0.2.1",
-        "babel-plugin-transform-class-properties": "^6.24.1",
-        "babel-plugin-transform-object-rest-spread": "^6.26.0",
-        "eslint": "^4.8.0",
-        "eslint-config-google": "^0.9.1",
-        "eslint-plugin-flowtype": "^2.35.0",
-        "eslint-plugin-import": "^2.7.0"
-    },
-    "scripts": {
-        "flow": "flow",
-        "clean": "rm -rf dist",
-        "build": "babel src -d dist",
-        "watch": "babel src -d dist -w",
-        "eslint": "node_modules/.bin/eslint --fix src",
-        "prepare": "npm run clean && npm run eslint && npm run flow && npm run build"
-    }
+  "name": "queue-promise",
+  "version": "1.0.0",
+  "keywords": [
+    "queue",
+    "queue-tasks",
+    "queue-request",
+    "promise",
+    "promise-chain",
+    "promise-queue"
+  ],
+  "description": "A simple and small library for promise-based queues",
+  "author": "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bartozzz/queue-promise.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Bartozzz/queue-promise/issues"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.26.0"
+  },
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-flow": "^6.23.0",
+    "eslint": "^4.16.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-flowtype": "^2.42.0",
+    "eslint-plugin-import": "^2.8.0",
+    "flow-bin": "^0.64.0",
+    "mocha": "^5.0.0",
+    "webpack": "^3.10.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "rm -rf dist",
+    "build": "babel src -d dist",
+    "watch": "babel src -d dist -w",
+    "eslint": "node_modules/.bin/eslint --fix src",
+    "prepare": "npm run clean && npm run eslint && npm run flow && npm run build"
+  }
 }
