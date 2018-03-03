@@ -70,7 +70,6 @@ var Queue = function (_EventEmitter) {
         _this.current = 0;
         _this.options = {};
         _this.started = false;
-        _this.interval = 0;
         _this.options = _extends({
             concurrency: 5,
             interval: 500
@@ -91,7 +90,7 @@ var Queue = function (_EventEmitter) {
     /**
      * Queue interval.
      *
-     * @type    {number}
+     * @type    {IntervalID}
      */
 
 
@@ -162,7 +161,6 @@ var Queue = function (_EventEmitter) {
             clearInterval(this.interval);
 
             this.started = false;
-            this.interval = 0;
         }
 
         /**

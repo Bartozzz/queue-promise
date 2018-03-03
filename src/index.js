@@ -44,9 +44,9 @@ export default class Queue extends EventEmitter {
     /**
      * Queue interval.
      *
-     * @type    {number}
+     * @type    {IntervalID}
      */
-    interval: number = 0;
+    interval: IntervalID;
 
     /**
      * Initializes a new Queue instance with provided options.
@@ -121,7 +121,6 @@ export default class Queue extends EventEmitter {
         clearInterval(this.interval);
 
         this.started = false;
-        this.interval = 0;
     }
 
     /**
