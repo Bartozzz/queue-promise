@@ -18,7 +18,7 @@ describe("queue-promise", function () {
       queue.add(reject);
       queue.add(resolve);
 
-      expect(queue.collection.size).to.equal(2);
+      expect(queue.stack.size).to.equal(2);
     });
 
     it("should reject a new task if not valid", function () {
@@ -36,7 +36,7 @@ describe("queue-promise", function () {
       queue.remove(0);
       queue.remove(1);
 
-      expect(queue.collection.size).to.equal(0);
+      expect(queue.stack.size).to.equal(0);
     });
   });
 

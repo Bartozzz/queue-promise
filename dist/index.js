@@ -53,7 +53,7 @@ var Queue = function (_EventEmitter) {
    */
 
   /**
-   * A collection to store unresolved promises in.
+   * A stack to store unresolved promises in.
    *
    * @type    {Map}
    */
@@ -65,7 +65,7 @@ var Queue = function (_EventEmitter) {
     // Default options:
     var _this = _possibleConstructorReturn(this, (Queue.__proto__ || Object.getPrototypeOf(Queue)).call(this));
 
-    _this.collection = new Map();
+    _this.stack = new Map();
     _this.unique = 0;
     _this.current = 0;
     _this.options = {};
@@ -123,7 +123,7 @@ var Queue = function (_EventEmitter) {
       this.interval = setInterval(function () {
         _this2.emit("tick");
 
-        _this2.collection.forEach(function (promise, id) {
+        _this2.stack.forEach(function (promise, id) {
           // Maximum amount of parallel concurrencies:
           if (_this2.current + 1 > _this2.options.concurrency) {
             return;
@@ -172,7 +172,7 @@ var Queue = function (_EventEmitter) {
   }, {
     key: "next",
     value: function next() {
-      if (--this.current === 0 && this.collection.size === 0) {
+      if (--this.current === 0 && this.stack.size === 0) {
         this.emit("end");
         this.stop();
       }
@@ -181,8 +181,9 @@ var Queue = function (_EventEmitter) {
     /**
      * Adds a promise to the queue.
      *
-     * @param   {Promise}   promise Promise to add to the queue
-     * @throws  {Error}             when the promise is not a function
+     * @param   {Function}  promise Promise to add to the queue
+     * @throws  {Error}             When promise is not a function
+     * @return  {void}
      */
 
   }, {
@@ -192,7 +193,7 @@ var Queue = function (_EventEmitter) {
         throw new Error("You must provide a function, not " + (typeof promise === "undefined" ? "undefined" : _typeof(promise)) + ".");
       }
 
-      this.collection.set(this.unique++, promise);
+      this.stack.set(this.unique++, promise);
     }
 
     /**
@@ -205,7 +206,37 @@ var Queue = function (_EventEmitter) {
   }, {
     key: "remove",
     value: function remove(key) {
-      return this.collection.delete(key);
+      return this.stack.delete(key);
+    }
+
+    /**
+     * @see     add
+     */
+
+  }, {
+    key: "push",
+    value: function push(promise) {
+      this.add(promise);
+    }
+
+    /**
+     * @see     remove
+     */
+
+  }, {
+    key: "pop",
+    value: function pop(key) {
+      return this.add(promise);
+    }
+
+    /**
+     * @see     remove
+     */
+
+  }, {
+    key: "shift",
+    value: function shift(key) {
+      return this.add(promise);
     }
   }]);
 

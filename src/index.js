@@ -7,11 +7,11 @@ import EventEmitter from "events";
  */
 export default class Queue extends EventEmitter {
   /**
-   * A collection to store unresolved promises in.
+   * A stack to store unresolved promises in.
    *
    * @type    {Map}
    */
-  collection: Map<number, () => Promise<*>> = new Map();
+  stack: Map<number, Function> = new Map();
 
   /**
    * Used to generate unique id for each promise.
@@ -87,7 +87,7 @@ export default class Queue extends EventEmitter {
     this.interval = setInterval(() => {
       this.emit("tick");
 
-      this.collection.forEach((promise, id) => {
+      this.stack.forEach((promise, id) => {
         // Maximum amount of parallel concurrencies:
         if (this.current + 1 > this.options.concurrency) {
           return;
@@ -129,7 +129,7 @@ export default class Queue extends EventEmitter {
    * @emits   end
    */
   next(): void {
-    if (--this.current === 0 && this.collection.size === 0) {
+    if (--this.current === 0 && this.stack.size === 0) {
       this.emit("end");
       this.stop();
     }
@@ -138,15 +138,16 @@ export default class Queue extends EventEmitter {
   /**
    * Adds a promise to the queue.
    *
-   * @param   {Promise}   promise Promise to add to the queue
-   * @throws  {Error}             when the promise is not a function
+   * @param   {Function}  promise Promise to add to the queue
+   * @throws  {Error}             When promise is not a function
+   * @return  {void}
    */
-  add(promise: () => Promise<*>): void {
+  add(promise: Function): void {
     if (typeof promise !== "function") {
       throw new Error(`You must provide a function, not ${typeof promise}.`);
     }
 
-    this.collection.set(this.unique++, promise);
+    this.stack.set(this.unique++, promise);
   }
 
   /**
@@ -156,6 +157,27 @@ export default class Queue extends EventEmitter {
    * @return  {boolean}
    */
   remove(key: number): boolean {
-    return this.collection.delete(key);
+    return this.stack.delete(key);
+  }
+
+  /**
+   * @see     add
+   */
+  push(promise: Function): void {
+    this.add(promise);
+  }
+
+  /**
+   * @see     remove
+   */
+  pop(key: number): boolean {
+    return this.add(promise);
+  }
+
+  /**
+   * @see     remove
+   */
+  shift(key: number): boolean {
+    return this.add(promise);
   }
 }
