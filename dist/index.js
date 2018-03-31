@@ -132,7 +132,7 @@ var Queue = function (_EventEmitter) {
           _this2.current++;
           _this2.remove(id);
 
-          promise().then(function () {
+          Promise.resolve(promise()).then(function () {
             for (var _len = arguments.length, output = Array(_len), _key = 0; _key < _len; _key++) {
               output[_key] = arguments[_key];
             }
@@ -188,8 +188,8 @@ var Queue = function (_EventEmitter) {
   }, {
     key: "add",
     value: function add(promise) {
-      if (Promise.resolve(promise) === promise) {
-        throw new Error("You must provide a valid Promise, not " + (typeof promise === "undefined" ? "undefined" : _typeof(promise)) + ".");
+      if (typeof promise !== "function") {
+        throw new Error("You must provide a function, not " + (typeof promise === "undefined" ? "undefined" : _typeof(promise)) + ".");
       }
 
       this.collection.set(this.unique++, promise);

@@ -96,7 +96,7 @@ export default class Queue extends EventEmitter {
         this.current++;
         this.remove(id);
 
-        promise()
+        Promise.resolve(promise())
           .then((...output) => {
             this.emit("resolve", ...output);
           })
@@ -142,10 +142,8 @@ export default class Queue extends EventEmitter {
    * @throws  {Error}             when the promise is not a function
    */
   add(promise: () => Promise<*>): void {
-    if (Promise.resolve(promise) === promise) {
-      throw new Error(
-        `You must provide a valid Promise, not ${typeof promise}.`
-      );
+    if (typeof promise !== "function") {
+      throw new Error(`You must provide a function, not ${typeof promise}.`);
     }
 
     this.collection.set(this.unique++, promise);
