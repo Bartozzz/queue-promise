@@ -1,163 +1,197 @@
 // @flow
-
 import EventEmitter from "events";
 
 /**
- * A simple and small library for promise-based queues.
+ * A small and simple library for promise-based queues. It will resolve enqueued
+ * functions concurrently at a specified speed. When a task is being resolved or
+ * rejected, an event will be emitted.
+ *
+ * @class   Queue
+ * @extends EventEmitter
  */
 export default class Queue extends EventEmitter {
-    /**
-     * A collection to store unresolved promises in.
-     *
-     * @type    {Map}
-     */
-    collection: Map<number, () => Promise<*>> = new Map;
+  /**
+   * A stack to store unresolved tasks.
+   *
+   * @type    {Map}
+   */
+  stack: Map<number, Function> = new Map();
 
-    /**
-     * Used to generate unique id for each promise.
-     *
-     * @type    {number}
-     */
-    unique: number = 0;
+  /**
+   * Used to generate unique id for each task.
+   *
+   * @type    {number}
+   */
+  unique: number = 0;
 
-    /**
-     * Amount of promises currently handled.
-     *
-     * @type    {number}
-     */
-    current: number = 0;
+  /**
+   * Amount of tasks currently handled by the Queue.
+   *
+   * @type    {number}
+   */
+  current: number = 0;
 
-    /**
-     * Queue config.
-     *
-     * @type    {Object}
-     */
-    options: Object = {};
+  /**
+   * Queue config.
+   *
+   * @type    {Object}
+   */
+  options: Object = {};
 
-    /**
-     * Whenever the queue has started.
-     *
-     * @type    {boolean}
-     */
-    started: boolean = false;
+  /**
+   * @type    {boolean}
+   */
+  started: boolean = false;
 
-    /**
-     * Queue interval.
-     *
-     * @type    {IntervalID}
-     */
-    interval: IntervalID;
+  /**
+   * @type    {IntervalID}
+   */
+  interval: IntervalID;
 
-    /**
-     * Initializes a new Queue instance with provided options.
-     *
-     * @param   {object}    options
-     * @param   {number}    options.concurrency how many promises can be
-     *                                          handled at the same time
-     * @param   {number}    options.interval    how often should new promises be
-     *                                          handled (in ms)
-     */
-    constructor(options: Object = {}): void {
-        super();
+  /**
+   * Initializes a new Queue instance with provided options.
+   *
+   * @param   {Object}  options
+   * @param   {number}  options.concurrent
+   * @param   {number}  options.interval
+   */
+  constructor(options: Object = {}): void {
+    super();
 
-        // Default options:
-        this.options = {
-            concurrency: 5,
-            interval: 500,
-            ...options,
-        };
+    // Default options:
+    this.options = {
+      concurrent: 5,
+      interval: 500,
+      ...options
+    };
+
+    // Backward compatibility:
+    if (options.concurrency) {
+      this.options.concurrent = options.concurrency;
+    }
+  }
+
+  /**
+   * Starts the queue if it has not been started yet.
+   *
+   * @emits   start
+   * @emits   tick
+   * @emits   resolve
+   * @emits   reject
+   * @return  {void}
+   * @access  public
+   */
+  start(): void {
+    if (this.started) {
+      return;
     }
 
-    /**
-     * Starts the queue if it has not been started yet.
-     *
-     * @emits   start
-     * @emits   tick
-     * @emits   request
-     * @emits   error
-     */
-    start(): void {
-        if (this.started) {
-            return;
+    this.emit("start");
+
+    this.started = true;
+    this.interval = setInterval(() => {
+      this.emit("tick");
+
+      this.stack.forEach((promise, id) => {
+        // Maximum amount of parallel concurrencies:
+        if (this.current + 1 > this.options.concurrent) {
+          return;
         }
 
-        this.emit("start");
+        this.current++;
+        this.remove(id);
 
-        this.started = true;
-        this.interval = setInterval(() => {
-            this.emit("tick");
+        Promise.resolve(promise())
+          .then((...output) => {
+            this.emit("resolve", ...output);
+          })
+          .catch(error => {
+            this.emit("reject", error);
+          })
+          .then(() => {
+            this.next();
+          });
+      });
+    }, parseInt(this.options.interval));
+  }
 
-            this.collection.forEach((promise, id) => {
-                // Maximum amount of parallel concurrencies:
-                if (this.current + 1 > this.options.concurrency) {
-                    return;
-                }
+  /**
+   * Stops the queue.
+   *
+   * @emits   stop
+   * @return  {void}
+   * @access  public
+   */
+  stop(): void {
+    this.emit("stop");
 
-                this.current++;
-                this.remove(id);
+    clearInterval(this.interval);
 
-                promise()
-                    .then((...output) => {
-                        this.emit("resolve", ...output);
-                    })
-                    .catch((error) => {
-                        this.emit("reject", error);
-                    })
-                    .then(() => {
-                        this.next();
-                    });
-            });
-        }, parseInt(this.options.interval));
+    this.started = false;
+  }
+
+  /**
+   * Goes to the next request and stops the loop if there is no requests left.
+   *
+   * @emits   end
+   * @return  {void}
+   * @access  private
+   */
+  next(): void {
+    if (--this.current === 0 && this.stack.size === 0) {
+      this.emit("end");
+      this.stop();
+    }
+  }
+
+  /**
+   * Adds a promise to the queue.
+   *
+   * @param   {Function}  promise Promise to add to the queue
+   * @throws  {Error}             When promise is not a function
+   * @return  {void}
+   * @access  public
+   */
+  add(promise: Function): void {
+    if (typeof promise !== "function") {
+      throw new Error(`You must provide a function, not ${typeof promise}.`);
     }
 
-    /**
-     * Stops the queue.
-     *
-     * @emits   stop
-     */
-    stop(): void {
-        this.emit("stop");
+    this.stack.set(this.unique++, promise);
+  }
 
-        clearInterval(this.interval);
+  /**
+   * Removes a task from the queue.
+   *
+   * @param   {number}    key     Promise id
+   * @return  {boolean}
+   * @access  private
+   */
+  remove(key: number): boolean {
+    return this.stack.delete(key);
+  }
 
-        this.started = false;
-    }
+  /**
+   * @see     add
+   * @access  public
+   */
+  push(promise: Function): void {
+    this.add(promise);
+  }
 
-    /**
-     * Goes to the next request and stops the loop if there is no requests left.
-     *
-     * @emits   end
-     */
-    next(): void {
-        if (--this.current === 0 && this.collection.size === 0) {
-            this.emit("end");
-            this.stop();
-        }
-    }
+  /**
+   * @see     remove
+   * @access  private
+   */
+  pop(key: number): boolean {
+    return this.remove(key);
+  }
 
-    /**
-     * Adds a promise to the queue.
-     *
-     * @param   {Promise}   promise Promise to add to the queue
-     * @throws  {Error}             when the promise is not a function
-     */
-    add(promise: () => Promise<*>): void {
-        if (Promise.resolve(promise) == promise) {
-            throw new Error(
-                `You must provide a valid Promise, not ${typeof promise}.`
-            );
-        }
-
-        this.collection.set(this.unique++, promise);
-    }
-
-    /**
-     * Removes a promise from the queue.
-     *
-     * @param   {number}    key     Promise id
-     * @return  {boolean}
-     */
-    remove(key: number): boolean {
-        return this.collection.delete(key);
-    }
+  /**
+   * @see     remove
+   * @access  private
+   */
+  shift(key: number): boolean {
+    return this.remove(key);
+  }
 }

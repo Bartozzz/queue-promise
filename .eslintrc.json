@@ -1,0 +1,36 @@
+{
+  "parser": "babel-eslint",
+
+  "extends": ["standard", "prettier", "prettier/flowtype", "prettier/standard"],
+  "plugins": ["flowtype", "standard", "prettier"],
+
+  "env": {
+    "es6": true
+  },
+
+  "parserOptions": {
+    "ecmaVersion": 7,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
+  },
+
+  "rules": {
+    "quotes": [1, "double"],
+    "indent": [2, 2, {"SwitchCase": 1}],
+
+    "no-console": [0],
+    "no-param-reassign": [0],
+    "no-else-return": [0],
+    "no-confusing-arrow": [0],
+    "no-prototype-builtins": [0],
+
+    "prettier/prettier": [2],
+    "flowtype/define-flow-type": 1,
+
+    "import/first": [0],
+    "import/prefer-default-export": [0],
+    "import/no-extraneous-dependencies": [0]
+  }
+}
