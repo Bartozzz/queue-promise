@@ -1,17 +1,16 @@
 {
   "name": "queue-promise",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "keywords": [
     "queue",
     "queue-tasks",
-    "queue-request",
+    "queue-promise",
     "promise",
     "promise-chain",
     "promise-queue"
   ],
-  "description": "A simple and small library for promise-based queues",
-  "author":
-    "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
+  "description": "A simple, dependency-free library for concurrent promise-based queues",
+  "author": "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
   "license": "MIT",
   "main": "dist/index.js",
   "repository": {

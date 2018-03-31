@@ -240,7 +240,7 @@ var Queue = function (_EventEmitter) {
   }, {
     key: "pop",
     value: function pop(key) {
-      return this.add(promise);
+      return this.remove(key);
     }
 
     /**
@@ -251,7 +251,7 @@ var Queue = function (_EventEmitter) {
   }, {
     key: "shift",
     value: function shift(key) {
-      return this.add(promise);
+      return this.remove(key);
     }
   }]);
 
