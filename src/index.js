@@ -184,7 +184,7 @@ export default class Queue extends EventEmitter {
    * @access  private
    */
   pop(key: number): boolean {
-    return this.add(promise);
+    return this.remove(key);
   }
 
   /**
@@ -192,6 +192,6 @@ export default class Queue extends EventEmitter {
    * @access  private
    */
   shift(key: number): boolean {
-    return this.add(promise);
+    return this.remove(key);
   }
 }
