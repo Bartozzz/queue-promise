@@ -5,9 +5,10 @@
 [![Build Status](https://img.shields.io/travis/Bartozzz/queue-promise.svg)](https://travis-ci.org/Bartozzz/queue-promise/)
 [![npm version](https://img.shields.io/npm/v/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
 [![npm downloads](https://img.shields.io/npm/dt/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
-  <br>
+<br>
 
 A simple and small library for promise-based queues.
+
 </div>
 
 ## Installation
@@ -21,18 +22,18 @@ $ npm install queue-promise
 ```javascript
 import Queue from "queue-promise";
 
-const q = new Queue( {
-    concurrency : 1,
-    interval    : 2000
-} );
+const q = new Queue({
+  concurrency: 1,
+  interval: 2000
+});
 
-q.on( "resolve", data => console.log( data ) );
-q.on( "reject", error => console.error( error ) );
+q.on("resolve", data => console.log(data));
+q.on("reject", error => console.error(error));
 
-q.add( asyncTaskA ); // resolved/rejected after 0s
-q.add( asyncTaskB ); // resolved/rejected after 2s
-q.add( asyncTaskC ); // resolved/rejected after 4s
-q.add( asyncTaskD ); // resolved/rejected after 6s
+q.add(asyncTaskA); // resolved/rejected after 0s
+q.add(asyncTaskB); // resolved/rejected after 2s
+q.add(asyncTaskC); // resolved/rejected after 4s
+q.add(asyncTaskD); // resolved/rejected after 6s
 q.start();
 ```
 
@@ -43,7 +44,7 @@ q.start();
 Create a new `Queue` instance with optionally injected options.
 
 | Option      | Default | Description                                       |
-|:------------|:--------|:--------------------------------------------------|
+| :---------- | :------ | :------------------------------------------------ |
 | concurrency | 5       | How many promises can be handled at the same time |
 | interval    | 500     | How often should new promises be handled (in ms)  |
 
