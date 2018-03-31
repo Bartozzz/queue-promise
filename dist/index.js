@@ -23,7 +23,12 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
- * A simple and small library for promise-based queues.
+ * A small and simple library for promise-based queues. It will resolve enqueued
+ * functions concurrently at a specified speed. When a task is being resolved or
+ * rejected, an event will be emitted.
+ *
+ * @class   Queue
+ * @extends EventEmitter
  */
 var Queue = function (_EventEmitter) {
   _inherits(Queue, _EventEmitter);
@@ -31,29 +36,25 @@ var Queue = function (_EventEmitter) {
   /**
    * Initializes a new Queue instance with provided options.
    *
-   * @param   {object}    options
-   * @param   {number}    options.concurrency how many promises can be
-   *                                          handled at the same time
-   * @param   {number}    options.interval    how often should new promises be
-   *                                          handled (in ms)
+   * @param   {Object}  options
+   * @param   {number}  options.concurrent
+   * @param   {number}  options.interval
    */
 
 
   /**
-   * Whenever the queue has started.
-   *
    * @type    {boolean}
    */
 
 
   /**
-   * Amount of promises currently handled.
+   * Amount of tasks currently handled by the Queue.
    *
    * @type    {number}
    */
 
   /**
-   * A stack to store unresolved promises in.
+   * A stack to store unresolved tasks.
    *
    * @type    {Map}
    */
@@ -71,9 +72,14 @@ var Queue = function (_EventEmitter) {
     _this.options = {};
     _this.started = false;
     _this.options = _extends({
-      concurrency: 5,
+      concurrent: 5,
       interval: 500
     }, options);
+
+    // Backward compatibility:
+    if (options.concurrency) {
+      _this.options.concurrent = options.concurrency;
+    }
     return _this;
   }
 
@@ -82,14 +88,14 @@ var Queue = function (_EventEmitter) {
    *
    * @emits   start
    * @emits   tick
-   * @emits   request
-   * @emits   error
+   * @emits   resolve
+   * @emits   reject
+   * @return  {void}
+   * @access  public
    */
 
 
   /**
-   * Queue interval.
-   *
    * @type    {IntervalID}
    */
 
@@ -102,7 +108,7 @@ var Queue = function (_EventEmitter) {
 
 
   /**
-   * Used to generate unique id for each promise.
+   * Used to generate unique id for each task.
    *
    * @type    {number}
    */
@@ -125,7 +131,7 @@ var Queue = function (_EventEmitter) {
 
         _this2.stack.forEach(function (promise, id) {
           // Maximum amount of parallel concurrencies:
-          if (_this2.current + 1 > _this2.options.concurrency) {
+          if (_this2.current + 1 > _this2.options.concurrent) {
             return;
           }
 
@@ -151,6 +157,8 @@ var Queue = function (_EventEmitter) {
      * Stops the queue.
      *
      * @emits   stop
+     * @return  {void}
+     * @access  public
      */
 
   }, {
@@ -167,6 +175,8 @@ var Queue = function (_EventEmitter) {
      * Goes to the next request and stops the loop if there is no requests left.
      *
      * @emits   end
+     * @return  {void}
+     * @access  private
      */
 
   }, {
@@ -184,6 +194,7 @@ var Queue = function (_EventEmitter) {
      * @param   {Function}  promise Promise to add to the queue
      * @throws  {Error}             When promise is not a function
      * @return  {void}
+     * @access  public
      */
 
   }, {
@@ -197,10 +208,11 @@ var Queue = function (_EventEmitter) {
     }
 
     /**
-     * Removes a promise from the queue.
+     * Removes a task from the queue.
      *
      * @param   {number}    key     Promise id
      * @return  {boolean}
+     * @access  private
      */
 
   }, {
@@ -211,6 +223,7 @@ var Queue = function (_EventEmitter) {
 
     /**
      * @see     add
+     * @access  public
      */
 
   }, {
@@ -221,6 +234,7 @@ var Queue = function (_EventEmitter) {
 
     /**
      * @see     remove
+     * @access  private
      */
 
   }, {
@@ -231,6 +245,7 @@ var Queue = function (_EventEmitter) {
 
     /**
      * @see     remove
+     * @access  private
      */
 
   }, {

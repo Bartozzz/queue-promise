@@ -1,27 +1,31 @@
 // @flow
-
 import EventEmitter from "events";
 
 /**
- * A simple and small library for promise-based queues.
+ * A small and simple library for promise-based queues. It will resolve enqueued
+ * functions concurrently at a specified speed. When a task is being resolved or
+ * rejected, an event will be emitted.
+ *
+ * @class   Queue
+ * @extends EventEmitter
  */
 export default class Queue extends EventEmitter {
   /**
-   * A stack to store unresolved promises in.
+   * A stack to store unresolved tasks.
    *
    * @type    {Map}
    */
   stack: Map<number, Function> = new Map();
 
   /**
-   * Used to generate unique id for each promise.
+   * Used to generate unique id for each task.
    *
    * @type    {number}
    */
   unique: number = 0;
 
   /**
-   * Amount of promises currently handled.
+   * Amount of tasks currently handled by the Queue.
    *
    * @type    {number}
    */
@@ -35,15 +39,11 @@ export default class Queue extends EventEmitter {
   options: Object = {};
 
   /**
-   * Whenever the queue has started.
-   *
    * @type    {boolean}
    */
   started: boolean = false;
 
   /**
-   * Queue interval.
-   *
    * @type    {IntervalID}
    */
   interval: IntervalID;
@@ -51,21 +51,24 @@ export default class Queue extends EventEmitter {
   /**
    * Initializes a new Queue instance with provided options.
    *
-   * @param   {object}    options
-   * @param   {number}    options.concurrency how many promises can be
-   *                                          handled at the same time
-   * @param   {number}    options.interval    how often should new promises be
-   *                                          handled (in ms)
+   * @param   {Object}  options
+   * @param   {number}  options.concurrent
+   * @param   {number}  options.interval
    */
   constructor(options: Object = {}): void {
     super();
 
     // Default options:
     this.options = {
-      concurrency: 5,
+      concurrent: 5,
       interval: 500,
       ...options
     };
+
+    // Backward compatibility:
+    if (options.concurrency) {
+      this.options.concurrent = options.concurrency;
+    }
   }
 
   /**
@@ -73,8 +76,10 @@ export default class Queue extends EventEmitter {
    *
    * @emits   start
    * @emits   tick
-   * @emits   request
-   * @emits   error
+   * @emits   resolve
+   * @emits   reject
+   * @return  {void}
+   * @access  public
    */
   start(): void {
     if (this.started) {
@@ -89,7 +94,7 @@ export default class Queue extends EventEmitter {
 
       this.stack.forEach((promise, id) => {
         // Maximum amount of parallel concurrencies:
-        if (this.current + 1 > this.options.concurrency) {
+        if (this.current + 1 > this.options.concurrent) {
           return;
         }
 
@@ -114,6 +119,8 @@ export default class Queue extends EventEmitter {
    * Stops the queue.
    *
    * @emits   stop
+   * @return  {void}
+   * @access  public
    */
   stop(): void {
     this.emit("stop");
@@ -127,6 +134,8 @@ export default class Queue extends EventEmitter {
    * Goes to the next request and stops the loop if there is no requests left.
    *
    * @emits   end
+   * @return  {void}
+   * @access  private
    */
   next(): void {
     if (--this.current === 0 && this.stack.size === 0) {
@@ -141,6 +150,7 @@ export default class Queue extends EventEmitter {
    * @param   {Function}  promise Promise to add to the queue
    * @throws  {Error}             When promise is not a function
    * @return  {void}
+   * @access  public
    */
   add(promise: Function): void {
     if (typeof promise !== "function") {
@@ -151,10 +161,11 @@ export default class Queue extends EventEmitter {
   }
 
   /**
-   * Removes a promise from the queue.
+   * Removes a task from the queue.
    *
    * @param   {number}    key     Promise id
    * @return  {boolean}
+   * @access  private
    */
   remove(key: number): boolean {
     return this.stack.delete(key);
@@ -162,6 +173,7 @@ export default class Queue extends EventEmitter {
 
   /**
    * @see     add
+   * @access  public
    */
   push(promise: Function): void {
     this.add(promise);
@@ -169,6 +181,7 @@ export default class Queue extends EventEmitter {
 
   /**
    * @see     remove
+   * @access  private
    */
   pop(key: number): boolean {
     return this.add(promise);
@@ -176,6 +189,7 @@ export default class Queue extends EventEmitter {
 
   /**
    * @see     remove
+   * @access  private
    */
   shift(key: number): boolean {
     return this.add(promise);
