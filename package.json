@@ -10,7 +10,8 @@
     "promise-queue"
   ],
   "description": "A simple and small library for promise-based queues",
-  "author": "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
+  "author":
+    "Łaniewski Bartosz <laniewski.bartozzz@gmail.com> (http://laniewski.me/)",
   "license": "MIT",
   "main": "dist/index.js",
   "repository": {
@@ -44,11 +45,13 @@
     "prettier": "^1.11.1"
   },
   "scripts": {
-    "flow": "flow",
-    "lint": "node_modules/.bin/eslint --fix src",
+    "test": "npm run test:eslint && npm run test:flow && npm run test:mocha",
+    "test:flow": "flow",
+    "test:mocha": "mocha --require babel-core/register",
+    "test:eslint": "eslint --fix src",
     "clean": "rm -rf dist",
     "build": "babel src -d dist",
     "watch": "babel src -d dist -w",
-    "prepare": "npm run clean && npm run lint && npm run flow && npm run build"
+    "prepare": "npm run clean && npm run test && npm run build"
   }
 }
