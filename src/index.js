@@ -112,7 +112,7 @@ export default class Queue extends EventEmitter {
    * @access  private
    */
   finalize(): void {
-    if (--this.current === 0 && this.tasks.size === 0) {
+    if (--this.current === 0 && this.isEmpty) {
       this.emit("end");
       this.stop();
     }
@@ -181,5 +181,15 @@ export default class Queue extends EventEmitter {
    */
   clear(): void {
     this.tasks.clear();
+  }
+
+  /**
+   * Checks whether the queue is empty, i.e. there's no tasks.
+   *
+   * @type  {boolean}
+   * @access  public
+   */
+  get isEmpty(): boolean {
+    return this.tasks.size === 0;
   }
 }
