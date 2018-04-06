@@ -92,30 +92,7 @@ export default class Queue extends EventEmitter {
     this.emit("start");
 
     this.started = true;
-    this.interval = setInterval(() => {
-      this.emit("tick");
-
-      this.stack.forEach((promise, id) => {
-        // Maximum amount of parallel concurrencies:
-        if (this.current + 1 > this.options.concurrent) {
-          return;
-        }
-
-        this.current++;
-        this.remove(id);
-
-        Promise.resolve(promise())
-          .then((...output) => {
-            this.emit("resolve", ...output);
-          })
-          .catch(error => {
-            this.emit("reject", error);
-          })
-          .then(() => {
-            this.next();
-          });
-      });
-    }, parseInt(this.options.interval));
+    this.interval = setInterval(() => this.dequeue(), this.options.interval);
   }
 
   /**
@@ -140,11 +117,40 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  private
    */
-  next(): void {
-    if (--this.current === 0 && this.stack.size === 0) {
+  finalize(): void {
+    if (--this.current === 0 && this.tasks.size === 0) {
       this.emit("end");
       this.stop();
     }
+  }
+
+  /**
+   * Resolves n concurrent promises from the queue.
+   *
+   * @return  {void}
+   * @access  public
+   */
+  dequeue(): void {
+    this.tasks.forEach((promise, id) => {
+      // Maximum amount of parallel concurrencies:
+      if (this.current + 1 > this.options.concurrent) {
+        return;
+      }
+
+      this.current++;
+      this.tasks.delete(id);
+
+      Promise.resolve(promise())
+        .then((...output) => {
+          this.emit("resolve", ...output);
+        })
+        .catch(error => {
+          this.emit("reject", error);
+        })
+        .then(() => {
+          this.finalize();
+        });
+    });
   }
 
   /**
