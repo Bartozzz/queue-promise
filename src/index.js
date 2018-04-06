@@ -15,7 +15,7 @@ export default class Queue extends EventEmitter {
    *
    * @type    {Map}
    */
-  stack: Map<number, Function> = new Map();
+  tasks: Map<number, Function> = new Map();
 
   /**
    * Used to generate unique id for each task.
@@ -161,46 +161,19 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  public
    */
-  add(promise: Function): void {
+  enqueue(promise: Function): void {
     if (typeof promise !== "function") {
       throw new Error(`You must provide a function, not ${typeof promise}.`);
     }
 
-    this.stack.set(this.unique++, promise);
+    this.tasks.set(this.unique++, promise);
   }
 
   /**
-   * Removes a task from the queue.
-   *
-   * @param   {number}    key     Promise id
-   * @return  {boolean}
-   * @access  private
-   */
-  remove(key: number): boolean {
-    return this.stack.delete(key);
-  }
-
-  /**
-   * @see     add
+   * @see     enqueue
    * @access  public
    */
-  push(promise: Function): void {
-    this.add(promise);
-  }
-
-  /**
-   * @see     remove
-   * @access  private
-   */
-  pop(key: number): boolean {
-    return this.remove(key);
-  }
-
-  /**
-   * @see     remove
-   * @access  private
-   */
-  shift(key: number): boolean {
-    return this.remove(key);
+  add(promise: Function): void {
+    this.enqueue(promise);
   }
 }
