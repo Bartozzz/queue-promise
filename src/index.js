@@ -158,12 +158,17 @@ export default class Queue extends EventEmitter {
   /**
    * Adds a promise to the queue.
    *
-   * @param   {Function}  promise Promise to add to the queue
-   * @throws  {Error}             When promise is not a function
+   * @param   {Function|Array}  promise   Promise to add to the queue
+   * @throws  {Error}                     When promise is not a function
    * @return  {void}
    * @access  public
    */
-  enqueue(promise: Function): void {
+  enqueue(promise: Function | Array<Function>): void {
+    if (Array.isArray(promise)) {
+      promise.map(p => this.enqueue(p));
+      return;
+    }
+
     if (typeof promise !== "function") {
       throw new Error(`You must provide a function, not ${typeof promise}.`);
     }

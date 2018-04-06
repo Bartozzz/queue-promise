@@ -53,9 +53,26 @@ Create a new `Queue` instance.
 
 Puts a new task on the stack. Tasks should be an async function or return a promise. Throws an error if the provided `task` is not a valid function.
 
+**Example:**
+
+```javascript
+async function getRepos(user) {
+  return await github.getRepos(user);
+};
+
+queue.enqueue(getRepos("userA"));
+queue.enqueue(getRepos("userB"));
+
+// …equivalent to:
+queue.enqueue([
+  getRepos("userA"),
+  getRepos("userB"),
+]);
+```
+
 #### **public** `.dequeue()`
 
-Resolves n concurrent promises from the queue. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+Resolves _n_ concurrent promises from the queue. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
 #### **public** `.on(event, callback)`
 
