@@ -123,12 +123,14 @@ export default class Queue extends EventEmitter {
   /**
    * Resolves n concurrent promises from the queue.
    *
-   * @return  {void}
+   * @return  {Promise<*>}
    * @emits   resolve
    * @emits   reject
    * @access  public
    */
-  dequeue(): void {
+  dequeue(): Promise<*> {
+    const promises = [];
+
     this.tasks.forEach((promise, id) => {
       // Maximum amount of parallel concurrencies:
       if (this.current + 1 > this.options.concurrent) {
@@ -138,17 +140,22 @@ export default class Queue extends EventEmitter {
       this.current++;
       this.tasks.delete(id);
 
-      Promise.resolve(promise())
-        .then((...output) => {
-          this.emit("resolve", ...output);
-        })
-        .catch(error => {
-          this.emit("reject", error);
-        })
-        .then(() => {
-          this.finalize();
-        });
+      promises.push(Promise.resolve(promise()));
     });
+
+    return Promise.all(promises)
+      .then(values => {
+        for (let output of values) this.emit("resolve", output);
+        return values;
+      })
+      .catch(error => {
+        this.emit("reject", error);
+        return error;
+      })
+      .then(output => {
+        this.finalize();
+        return output;
+      });
   }
 
   /**
