@@ -74,10 +74,6 @@ export default class Queue extends EventEmitter {
     if (options.concurrency) {
       this.options.concurrent = options.concurrency;
     }
-
-    if (options.start) {
-      this.start();
-    }
   }
 
   /**
@@ -171,6 +167,12 @@ export default class Queue extends EventEmitter {
 
     if (typeof promise !== "function") {
       throw new Error(`You must provide a function, not ${typeof promise}.`);
+    }
+
+    // (Re)start the queue if new tasks are being added and the queue has been
+    // automatically started before:
+    if (this.options.start) {
+      this.start();
     }
 
     this.tasks.set(this.unique++, promise);
