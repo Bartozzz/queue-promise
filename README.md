@@ -23,8 +23,9 @@ $ npm install queue-promise
 import Queue from "queue-promise";
 
 const queue = new Queue({
-  concurrent: 1, // resolve 1 task at a time
-  interval: 2000 // resolve new tasks each 2000ms
+  concurrent: 1,  // resolve 1 task at a time
+  interval: 2000, // resolve new tasks each 2000ms,
+  start: true,    // automatically resolve new tasks when they are added
 });
 
 queue.on("resolve", data => console.log(data));
@@ -34,7 +35,6 @@ queue.enqueue(asyncTaskA); // resolved/rejected after 0s
 queue.enqueue(asyncTaskB); // resolved/rejected after 2s
 queue.enqueue(asyncTaskC); // resolved/rejected after 4s
 queue.enqueue(asyncTaskD); // resolved/rejected after 6s
-queue.start();
 ```
 
 ## API
@@ -43,18 +43,19 @@ queue.start();
 
 Create a new `Queue` instance.
 
-| Option     | Default | Description                                    |
-| :--------- | :------ | :--------------------------------------------- |
-| concurrent | 5       | How many tasks can be handled at the same time |
-| interval   | 500     | How often should new tasks be handled (in ms)  |
+| Option     | Default | Description                                                                  |
+| :--------- | :------ | :--------------------------------------------------------------------------- |
+| concurrent | `5`     | How many tasks can be handled at the same time                               |
+| interval   | `500`   | How often should new tasks be handled (in ms)                                |
+| start      | `true`  | Whether we should automatically resolve new tasks as soon as they are added  |
 
-#### **public** `.enqueue(task)`
+#### **public** `.enqueue(task)`/`.add(task)`
 
-Puts a new task on the stack. Throws an error if the provided `task` is not a valid function.
+Puts a new task on the stack. Tasks should be an async function or return a promise. Throws an error if the provided `task` is not a valid function.
 
 #### **public** `.dequeue()`
 
-Resolves n concurrent promises from the queue.
+Resolves n concurrent promises from the queue. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
 #### **public** `.on(event, callback)`
 
@@ -62,7 +63,7 @@ Sets a `callback` for an `event`. You can set callback for those events: `start`
 
 #### **public** `.start()`
 
-Starts the queue – it will automatically dequeue tasks periodically. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Emits `start` event.
+Starts the queue – it will automatically dequeue tasks periodically. Emits `start` event.
 
 #### **public** `.stop()`
 
@@ -79,6 +80,7 @@ Whether the queue has been started or not.
 #### **public** `.isEmpty`
 
 Whether the queue is empty, i.e. there's no tasks.
+
 ## Tests
 
 ```bash

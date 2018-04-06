@@ -7,7 +7,8 @@ describe("queue-promise", function () {
   let count = 0;
   let queue = new Queue({
     concurrency: 1,
-    interval: 500
+    interval: 500,
+    start: false,
   });
 
   const reject = () => new Promise((resolve, reject) => reject("Error"));

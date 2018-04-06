@@ -55,6 +55,7 @@ export default class Queue extends EventEmitter {
    * @param   {Object}  options
    * @param   {number}  options.concurrent
    * @param   {number}  options.interval
+   * @param   {boolean} options.start
    */
   constructor(options: Object = {}): void {
     super();
@@ -62,6 +63,7 @@ export default class Queue extends EventEmitter {
     this.options = {
       concurrent: 5,
       interval: 500,
+      start: true,
       ...options
     };
 
@@ -71,6 +73,10 @@ export default class Queue extends EventEmitter {
     // Backward compatibility:
     if (options.concurrency) {
       this.options.concurrent = options.concurrency;
+    }
+
+    if (options.start) {
+      this.start();
     }
   }
 
