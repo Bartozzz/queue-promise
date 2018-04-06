@@ -11,8 +11,11 @@ import EventEmitter from "events";
  */
 export default class Queue extends EventEmitter {
   /**
-   * A stack to store unresolved tasks.
+   * A collection to store unresolved tasks. We use a Map here because V8 uses a
+   * variant of hash tables that generally have O(1) complexity for retrieval
+   * and lookup.
    *
+   * @see     https://codereview.chromium.org/220293002/
    * @type    {Map}
    */
   tasks: Map<number, Function> = new Map();
@@ -32,8 +35,6 @@ export default class Queue extends EventEmitter {
   current: number = 0;
 
   /**
-   * Queue config.
-   *
    * @type    {Object}
    */
   options: Object = {};
@@ -58,7 +59,6 @@ export default class Queue extends EventEmitter {
   constructor(options: Object = {}): void {
     super();
 
-    // Default options:
     this.options = {
       concurrent: 5,
       interval: 500,
@@ -78,21 +78,16 @@ export default class Queue extends EventEmitter {
    * Starts the queue if it has not been started yet.
    *
    * @emits   start
-   * @emits   tick
-   * @emits   resolve
-   * @emits   reject
    * @return  {void}
    * @access  public
    */
   start(): void {
-    if (this.started) {
-      return;
+    if (!this.started) {
+      this.emit("start");
+
+      this.started = true;
+      this.interval = setInterval(() => this.dequeue(), this.options.interval);
     }
-
-    this.emit("start");
-
-    this.started = true;
-    this.interval = setInterval(() => this.dequeue(), this.options.interval);
   }
 
   /**
@@ -105,9 +100,8 @@ export default class Queue extends EventEmitter {
   stop(): void {
     this.emit("stop");
 
-    clearInterval(this.interval);
-
     this.started = false;
+    clearInterval(this.interval);
   }
 
   /**
@@ -128,6 +122,8 @@ export default class Queue extends EventEmitter {
    * Resolves n concurrent promises from the queue.
    *
    * @return  {void}
+   * @emits   resolve
+   * @emits   reject
    * @access  public
    */
   dequeue(): void {
