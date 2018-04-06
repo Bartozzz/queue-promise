@@ -174,7 +174,7 @@ export default class Queue extends EventEmitter {
   }
 
   /**
-   * Removes all tasks fromt the queue.
+   * Removes all tasks from the queue.
    *
    * @return  {void}
    * @access  public

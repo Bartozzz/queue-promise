@@ -24,16 +24,16 @@ import Queue from "queue-promise";
 
 const queue = new Queue({
   concurrent: 1, // resolve 1 task at a time
-  interval: 2000 // resolve a new task once in 2000ms
+  interval: 2000 // resolve new tasks each 2000ms
 });
 
 queue.on("resolve", data => console.log(data));
 queue.on("reject", error => console.error(error));
 
-queue.push(asyncTaskA); // resolved/rejected after 0s
-queue.push(asyncTaskB); // resolved/rejected after 2s
-queue.push(asyncTaskC); // resolved/rejected after 4s
-queue.push(asyncTaskD); // resolved/rejected after 6s
+queue.enqueue(asyncTaskA); // resolved/rejected after 0s
+queue.enqueue(asyncTaskB); // resolved/rejected after 2s
+queue.enqueue(asyncTaskC); // resolved/rejected after 4s
+queue.enqueue(asyncTaskD); // resolved/rejected after 6s
 queue.start();
 ```
 
@@ -48,34 +48,37 @@ Create a new `Queue` instance.
 | concurrent | 5       | How many tasks can be handled at the same time |
 | interval   | 500     | How often should new tasks be handled (in ms)  |
 
-#### **public** `.add(task)`/`.push(task)`
+#### **public** `.enqueue(task)`
 
 Puts a new task on the stack. Throws an error if the provided `task` is not a valid function.
 
+#### **public** `.dequeue()`
+
+Resolves n concurrent promises from the queue.
+
+#### **public** `.on(event, callback)`
+
+Sets a `callback` for an `event`. You can set callback for those events: `start`, `stop`, `resolve`, `reject`, `end`.
+
 #### **public** `.start()`
 
-Starts the queue. `Queue` will use global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+Starts the queue – it will automatically dequeue tasks periodically. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Emits `start` event.
+
+#### **public** `.stop()`
+
+Stops the queue. Emits `stop` event.
+
+#### **public** `.clear()`
+
+Removes all tasks from the queue.
 
 #### **public** `.started`
 
 Whether the queue has been started or not.
 
-#### **public** `.stop()`
+#### **public** `.isEmpty`
 
-Stops the queue.
-
-#### **public** `.on(event, callback)`
-
-Sets a `callback` for an `event`. You can set callback for those events: `start`, `stop`, `tick`, `resolve`, `reject`, `end`.
-
-#### **private** `.next()`
-
-Goes to the next request and stops the loop if there is no requests left.
-
-#### **private** `.remove(key)`/`.pop(key)`/`.shift(key)`
-
-Removes a task from the queue.
-
+Whether the queue is empty, i.e. there's no tasks.
 ## Tests
 
 ```bash
