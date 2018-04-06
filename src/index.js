@@ -65,6 +65,9 @@ export default class Queue extends EventEmitter {
       ...options
     };
 
+    this.options.interval = parseInt(this.options.interval);
+    this.options.concurrent = parseInt(this.options.concurrent);
+
     // Backward compatibility:
     if (options.concurrency) {
       this.options.concurrent = options.concurrency;
