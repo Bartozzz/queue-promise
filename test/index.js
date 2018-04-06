@@ -13,12 +13,12 @@ describe("queue-promise", function () {
   const reject = () => new Promise((resolve, reject) => reject("Error"));
   const resolve = () => new Promise((resolve, reject) => resolve("Success"));
 
-  describe("add(asyncTask)", function () {
+  describe("enqueue(asyncTask)", function () {
     it("should add a new task if valid", function () {
-      queue.add(reject);
-      queue.add(resolve);
+      queue.enqueue(reject);
+      queue.enqueue(resolve);
 
-      expect(queue.stack.size).to.equal(2);
+      expect(queue.tasks.size).to.equal(2);
     });
 
     it("should reject a new task if not valid", function () {
@@ -28,15 +28,6 @@ describe("queue-promise", function () {
         expect(err).to.be.an.instanceof(Error);
         expect(err.message).to.equal("You must provide a function, not boolean.");
       }
-    });
-  });
-
-  describe("remove(key)", function () {
-    it("should remove a registered task", function () {
-      queue.remove(0);
-      queue.remove(1);
-
-      expect(queue.stack.size).to.equal(0);
     });
   });
 
