@@ -11,11 +11,14 @@ import EventEmitter from "events";
  */
 export default class Queue extends EventEmitter {
   /**
-   * A stack to store unresolved tasks.
+   * A collection to store unresolved tasks. We use a Map here because V8 uses a
+   * variant of hash tables that generally have O(1) complexity for retrieval
+   * and lookup.
    *
+   * @see     https://codereview.chromium.org/220293002/
    * @type    {Map}
    */
-  stack: Map<number, Function> = new Map();
+  tasks: Map<number, Function> = new Map();
 
   /**
    * Used to generate unique id for each task.
@@ -32,8 +35,6 @@ export default class Queue extends EventEmitter {
   current: number = 0;
 
   /**
-   * Queue config.
-   *
    * @type    {Object}
    */
   options: Object = {};
@@ -54,16 +55,20 @@ export default class Queue extends EventEmitter {
    * @param   {Object}  options
    * @param   {number}  options.concurrent
    * @param   {number}  options.interval
+   * @param   {boolean} options.start
    */
   constructor(options: Object = {}): void {
     super();
 
-    // Default options:
     this.options = {
       concurrent: 5,
       interval: 500,
+      start: true,
       ...options
     };
+
+    this.options.interval = parseInt(this.options.interval);
+    this.options.concurrent = parseInt(this.options.concurrent);
 
     // Backward compatibility:
     if (options.concurrency) {
@@ -75,44 +80,16 @@ export default class Queue extends EventEmitter {
    * Starts the queue if it has not been started yet.
    *
    * @emits   start
-   * @emits   tick
-   * @emits   resolve
-   * @emits   reject
    * @return  {void}
    * @access  public
    */
   start(): void {
-    if (this.started) {
-      return;
+    if (!this.started) {
+      this.emit("start");
+
+      this.started = true;
+      this.interval = setInterval(() => this.dequeue(), this.options.interval);
     }
-
-    this.emit("start");
-
-    this.started = true;
-    this.interval = setInterval(() => {
-      this.emit("tick");
-
-      this.stack.forEach((promise, id) => {
-        // Maximum amount of parallel concurrencies:
-        if (this.current + 1 > this.options.concurrent) {
-          return;
-        }
-
-        this.current++;
-        this.remove(id);
-
-        Promise.resolve(promise())
-          .then((...output) => {
-            this.emit("resolve", ...output);
-          })
-          .catch(error => {
-            this.emit("reject", error);
-          })
-          .then(() => {
-            this.next();
-          });
-      });
-    }, parseInt(this.options.interval));
   }
 
   /**
@@ -125,9 +102,8 @@ export default class Queue extends EventEmitter {
   stop(): void {
     this.emit("stop");
 
-    clearInterval(this.interval);
-
     this.started = false;
+    clearInterval(this.interval);
   }
 
   /**
@@ -137,61 +113,103 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  private
    */
-  next(): void {
-    if (--this.current === 0 && this.stack.size === 0) {
+  finalize(): void {
+    if (--this.current === 0 && this.isEmpty) {
       this.emit("end");
       this.stop();
     }
   }
 
   /**
+   * Resolves n concurrent promises from the queue.
+   *
+   * @return  {Promise<*>}
+   * @emits   resolve
+   * @emits   reject
+   * @access  public
+   */
+  dequeue(): Promise<*> {
+    const promises = [];
+
+    this.tasks.forEach((promise, id) => {
+      // Maximum amount of parallel concurrencies:
+      if (this.current + 1 > this.options.concurrent) {
+        return;
+      }
+
+      this.current++;
+      this.tasks.delete(id);
+
+      promises.push(Promise.resolve(promise()));
+    });
+
+    return Promise.all(promises)
+      .then(values => {
+        for (let output of values) this.emit("resolve", output);
+        return values;
+      })
+      .catch(error => {
+        this.emit("reject", error);
+        return error;
+      })
+      .then(output => {
+        this.finalize();
+        return output;
+      });
+  }
+
+  /**
    * Adds a promise to the queue.
    *
-   * @param   {Function}  promise Promise to add to the queue
-   * @throws  {Error}             When promise is not a function
+   * @param   {Function|Array}  promise   Promise to add to the queue
+   * @throws  {Error}                     When promise is not a function
    * @return  {void}
    * @access  public
    */
-  add(promise: Function): void {
+  enqueue(promise: Function | Array<Function>): void {
+    if (Array.isArray(promise)) {
+      promise.map(p => this.enqueue(p));
+      return;
+    }
+
     if (typeof promise !== "function") {
       throw new Error(`You must provide a function, not ${typeof promise}.`);
     }
 
-    this.stack.set(this.unique++, promise);
+    // (Re)start the queue if new tasks are being added and the queue has been
+    // automatically started before:
+    if (this.options.start) {
+      this.start();
+    }
+
+    this.tasks.set(this.unique++, promise);
   }
 
   /**
-   * Removes a task from the queue.
-   *
-   * @param   {number}    key     Promise id
-   * @return  {boolean}
-   * @access  private
-   */
-  remove(key: number): boolean {
-    return this.stack.delete(key);
-  }
-
-  /**
-   * @see     add
+   * @see     enqueue
    * @access  public
    */
-  push(promise: Function): void {
-    this.add(promise);
+  add(promise: Function): void {
+    this.enqueue(promise);
   }
 
   /**
-   * @see     remove
-   * @access  private
+   * Removes all tasks from the queue.
+   *
+   * @return  {void}
+   * @access  public
    */
-  pop(key: number): boolean {
-    return this.remove(key);
+  clear(): void {
+    this.tasks.clear();
   }
 
   /**
-   * @see     remove
-   * @access  private
+   * Checks whether the queue is empty, i.e. there's no tasks.
+   *
+   * @type  {boolean}
+   * @access  public
    */
-  shift(key: number): boolean {
-    return this.remove(key);
+  get isEmpty(): boolean {
+    return this.tasks.size === 0;
   }
 }

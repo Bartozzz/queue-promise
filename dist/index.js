@@ -4,23 +4,51 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof2 = require("babel-runtime/helpers/typeof");
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _typeof3 = _interopRequireDefault(_typeof2);
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _getIterator2 = require("babel-runtime/core-js/get-iterator");
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+var _promise = require("babel-runtime/core-js/promise");
+
+var _promise2 = _interopRequireDefault(_promise);
+
+var _extends2 = require("babel-runtime/helpers/extends");
+
+var _extends3 = _interopRequireDefault(_extends2);
+
+var _map = require("babel-runtime/core-js/map");
+
+var _map2 = _interopRequireDefault(_map);
+
+var _getPrototypeOf = require("babel-runtime/core-js/object/get-prototype-of");
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require("babel-runtime/helpers/createClass");
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require("babel-runtime/helpers/possibleConstructorReturn");
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require("babel-runtime/helpers/inherits");
+
+var _inherits3 = _interopRequireDefault(_inherits2);
 
 var _events = require("events");
 
 var _events2 = _interopRequireDefault(_events);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
  * A small and simple library for promise-based queues. It will resolve enqueued
@@ -31,7 +59,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * @extends EventEmitter
  */
 var Queue = function (_EventEmitter) {
-  _inherits(Queue, _EventEmitter);
+  (0, _inherits3.default)(Queue, _EventEmitter);
 
   /**
    * Initializes a new Queue instance with provided options.
@@ -39,6 +67,7 @@ var Queue = function (_EventEmitter) {
    * @param   {Object}  options
    * @param   {number}  options.concurrent
    * @param   {number}  options.interval
+   * @param   {boolean} options.start
    */
 
 
@@ -54,27 +83,34 @@ var Queue = function (_EventEmitter) {
    */
 
   /**
-   * A stack to store unresolved tasks.
+   * A collection to store unresolved tasks. We use a Map here because V8 uses a
+   * variant of hash tables that generally have O(1) complexity for retrieval
+   * and lookup.
    *
+   * @see     https://codereview.chromium.org/220293002/
    * @type    {Map}
    */
   function Queue() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    (0, _classCallCheck3.default)(this, Queue);
 
-    _classCallCheck(this, Queue);
+    var _this = (0, _possibleConstructorReturn3.default)(this, (Queue.__proto__ || (0, _getPrototypeOf2.default)(Queue)).call(this));
 
-    // Default options:
-    var _this = _possibleConstructorReturn(this, (Queue.__proto__ || Object.getPrototypeOf(Queue)).call(this));
-
-    _this.stack = new Map();
+    _this.tasks = new _map2.default();
     _this.unique = 0;
     _this.current = 0;
     _this.options = {};
     _this.started = false;
-    _this.options = _extends({
+
+
+    _this.options = (0, _extends3.default)({
       concurrent: 5,
-      interval: 500
+      interval: 500,
+      start: true
     }, options);
+
+    _this.options.interval = parseInt(_this.options.interval);
+    _this.options.concurrent = parseInt(_this.options.concurrent);
 
     // Backward compatibility:
     if (options.concurrency) {
@@ -87,9 +123,6 @@ var Queue = function (_EventEmitter) {
    * Starts the queue if it has not been started yet.
    *
    * @emits   start
-   * @emits   tick
-   * @emits   resolve
-   * @emits   reject
    * @return  {void}
    * @access  public
    */
@@ -101,8 +134,6 @@ var Queue = function (_EventEmitter) {
 
 
   /**
-   * Queue config.
-   *
    * @type    {Object}
    */
 
@@ -114,43 +145,19 @@ var Queue = function (_EventEmitter) {
    */
 
 
-  _createClass(Queue, [{
+  (0, _createClass3.default)(Queue, [{
     key: "start",
     value: function start() {
       var _this2 = this;
 
-      if (this.started) {
-        return;
+      if (!this.started) {
+        this.emit("start");
+
+        this.started = true;
+        this.interval = setInterval(function () {
+          return _this2.dequeue();
+        }, this.options.interval);
       }
-
-      this.emit("start");
-
-      this.started = true;
-      this.interval = setInterval(function () {
-        _this2.emit("tick");
-
-        _this2.stack.forEach(function (promise, id) {
-          // Maximum amount of parallel concurrencies:
-          if (_this2.current + 1 > _this2.options.concurrent) {
-            return;
-          }
-
-          _this2.current++;
-          _this2.remove(id);
-
-          Promise.resolve(promise()).then(function () {
-            for (var _len = arguments.length, output = Array(_len), _key = 0; _key < _len; _key++) {
-              output[_key] = arguments[_key];
-            }
-
-            _this2.emit.apply(_this2, ["resolve"].concat(output));
-          }).catch(function (error) {
-            _this2.emit("reject", error);
-          }).then(function () {
-            _this2.next();
-          });
-        });
-      }, parseInt(this.options.interval));
     }
 
     /**
@@ -166,9 +173,8 @@ var Queue = function (_EventEmitter) {
     value: function stop() {
       this.emit("stop");
 
-      clearInterval(this.interval);
-
       this.started = false;
+      clearInterval(this.interval);
     }
 
     /**
@@ -180,81 +186,148 @@ var Queue = function (_EventEmitter) {
      */
 
   }, {
-    key: "next",
-    value: function next() {
-      if (--this.current === 0 && this.stack.size === 0) {
+    key: "finalize",
+    value: function finalize() {
+      if (--this.current === 0 && this.isEmpty) {
         this.emit("end");
         this.stop();
       }
     }
 
     /**
+     * Resolves n concurrent promises from the queue.
+     *
+     * @return  {Promise<*>}
+     * @emits   resolve
+     * @emits   reject
+     * @access  public
+     */
+
+  }, {
+    key: "dequeue",
+    value: function dequeue() {
+      var _this3 = this;
+
+      var promises = [];
+
+      this.tasks.forEach(function (promise, id) {
+        // Maximum amount of parallel concurrencies:
+        if (_this3.current + 1 > _this3.options.concurrent) {
+          return;
+        }
+
+        _this3.current++;
+        _this3.tasks.delete(id);
+
+        promises.push(_promise2.default.resolve(promise()));
+      });
+
+      return _promise2.default.all(promises).then(function (values) {
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = (0, _getIterator3.default)(values), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var output = _step.value;
+            _this3.emit("resolve", output);
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        return values;
+      }).catch(function (error) {
+        _this3.emit("reject", error);
+        return error;
+      }).then(function (output) {
+        _this3.finalize();
+        return output;
+      });
+    }
+
+    /**
      * Adds a promise to the queue.
      *
-     * @param   {Function}  promise Promise to add to the queue
-     * @throws  {Error}             When promise is not a function
+     * @param   {Function|Array}  promise   Promise to add to the queue
+     * @throws  {Error}                     When promise is not a function
      * @return  {void}
+     * @access  public
+     */
+
+  }, {
+    key: "enqueue",
+    value: function enqueue(promise) {
+      var _this4 = this;
+
+      if (Array.isArray(promise)) {
+        promise.map(function (p) {
+          return _this4.enqueue(p);
+        });
+        return;
+      }
+
+      if (typeof promise !== "function") {
+        throw new Error("You must provide a function, not " + (typeof promise === "undefined" ? "undefined" : (0, _typeof3.default)(promise)) + ".");
+      }
+
+      // (Re)start the queue if new tasks are being added and the queue has been
+      // automatically started before:
+      if (this.options.start) {
+        this.start();
+      }
+
+      this.tasks.set(this.unique++, promise);
+    }
+
+    /**
+     * @see     enqueue
      * @access  public
      */
 
   }, {
     key: "add",
     value: function add(promise) {
-      if (typeof promise !== "function") {
-        throw new Error("You must provide a function, not " + (typeof promise === "undefined" ? "undefined" : _typeof(promise)) + ".");
-      }
-
-      this.stack.set(this.unique++, promise);
+      this.enqueue(promise);
     }
 
     /**
-     * Removes a task from the queue.
+     * Removes all tasks from the queue.
      *
-     * @param   {number}    key     Promise id
-     * @return  {boolean}
-     * @access  private
-     */
-
-  }, {
-    key: "remove",
-    value: function remove(key) {
-      return this.stack.delete(key);
-    }
-
-    /**
-     * @see     add
+     * @return  {void}
      * @access  public
      */
 
   }, {
-    key: "push",
-    value: function push(promise) {
-      this.add(promise);
+    key: "clear",
+    value: function clear() {
+      this.tasks.clear();
     }
 
     /**
-     * @see     remove
-     * @access  private
+     * Checks whether the queue is empty, i.e. there's no tasks.
+     *
+     * @type  {boolean}
+     * @access  public
      */
 
   }, {
-    key: "pop",
-    value: function pop(key) {
-      return this.remove(key);
-    }
-
-    /**
-     * @see     remove
-     * @access  private
-     */
-
-  }, {
-    key: "shift",
-    value: function shift(key) {
-      return this.remove(key);
+    key: "isEmpty",
+    get: function get() {
+      return this.tasks.size === 0;
     }
   }]);
-
   return Queue;
 }(_events2.default);
 

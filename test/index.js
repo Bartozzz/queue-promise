@@ -7,23 +7,31 @@ describe("queue-promise", function () {
   let count = 0;
   let queue = new Queue({
     concurrency: 1,
-    interval: 500
+    interval: 500,
+    start: false,
   });
 
   const reject = () => new Promise((resolve, reject) => reject("Error"));
   const resolve = () => new Promise((resolve, reject) => resolve("Success"));
 
-  describe("add(asyncTask)", function () {
+  describe("enqueue(asyncTask)", function () {
     it("should add a new task if valid", function () {
-      queue.add(reject);
-      queue.add(resolve);
+      queue.enqueue(reject);
+      queue.enqueue(resolve);
 
-      expect(queue.stack.size).to.equal(2);
+      expect(queue.tasks.size).to.equal(2);
+    });
+
+    it("should add an array of tasks if valid", function () {
+      queue.enqueue([resolve, reject]);
+      queue.enqueue([resolve, reject]);
+
+      expect(queue.tasks.size).to.equal(6);
     });
 
     it("should reject a new task if not valid", function () {
       try {
-        expect(queue.add(true)).to.throw();
+        expect(queue.enqueue(true)).to.throw();
       } catch (err) {
         expect(err).to.be.an.instanceof(Error);
         expect(err.message).to.equal("You must provide a function, not boolean.");
@@ -31,32 +39,42 @@ describe("queue-promise", function () {
     });
   });
 
-  describe("remove(key)", function () {
-    it("should remove a registered task", function () {
-      queue.remove(0);
-      queue.remove(1);
+  describe("clear()", function () {
+    it("should remove enqueued tasks", function () {
+      queue.clear();
 
-      expect(queue.stack.size).to.equal(0);
+      expect(queue.isEmpty).to.equal(true);
+      expect(queue.tasks.size).to.equal(0);
+    });
+  });
+
+  describe("dequeue()", function () {
+    it("should resolve enqueued tasks", async function () {
+      queue.clear();
+      queue.enqueue(reject);
+      queue.enqueue(resolve);
+
+      expect(queue.tasks.size).to.equal(2);
+      await queue.dequeue();
+      expect(queue.tasks.size).to.equal(1);
+      await queue.dequeue();
+      expect(queue.tasks.size).to.equal(0);
     });
   });
 
   describe("on(event, callback)", function () {
-    it("should handle events", function () {
-      queue.on("resolve", function(data){count += 1});
-      queue.on("reject", function(error){count += 1});
-    });
-  });
-
-  describe("start()", function () {
     it("should handle events", function (done) {
-      queue.add(reject);
-      queue.add(resolve);
-      queue.start();
-
-      setTimeout(function () {
+      queue.on("resolve", data => count += 1);
+      queue.on("reject", error => count += 1);
+      queue.on("end", () => {
         expect(count).to.equal(2);
         done();
-      }, 1250);
+      });
+
+      queue.clear();
+      queue.enqueue(reject);
+      queue.enqueue(resolve);
+      queue.start();
     });
   });
 });
