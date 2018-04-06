@@ -172,4 +172,14 @@ export default class Queue extends EventEmitter {
   add(promise: Function): void {
     this.enqueue(promise);
   }
+
+  /**
+   * Removes all tasks fromt the queue.
+   *
+   * @return  {void}
+   * @access  public
+   */
+  clear(): void {
+    this.tasks.clear();
+  }
 }
