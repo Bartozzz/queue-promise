@@ -43,11 +43,11 @@ queue.enqueue(asyncTaskD); // resolved/rejected after 6s
 
 Create a new `Queue` instance.
 
-| Option     | Default | Description                                                                  |
-| :--------- | :------ | :--------------------------------------------------------------------------- |
-| concurrent | `5`     | How many tasks can be handled at the same time                               |
-| interval   | `500`   | How often should new tasks be handled (in ms)                                |
-| start      | `true`  | Whether we should automatically resolve new tasks as soon as they are added  |
+| Option       | Default | Description                                                                  |
+| :----------- | :------ | :--------------------------------------------------------------------------- |
+| `concurrent` | `5`     | How many tasks can be handled at the same time                               |
+| `interval`   | `500`   | How often should new tasks be handled (in ms)                                |
+| `start`      | `true`  | Whether we should automatically resolve new tasks as soon as they are added  |
 
 #### **public** `.enqueue(task)`/`.add(task)`
 
@@ -74,9 +74,33 @@ queue.enqueue([
 
 Resolves _n_ concurrent promises from the queue. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
+**Example:**
+
+```javascript
+queue.enqueue(getRepos("userA"));
+queue.enqueue(getRepos("userB"));
+
+// If "concurrent" is set to 1, only one promise is resolved on dequeue:
+const userA = await queue.dequeue();
+const userB = await queue.dequeue();
+
+// If "concurrent" is set to 2, two promises are resolved concurrently:
+const users = await queue.dequeue();
+```
+
 #### **public** `.on(event, callback)`
 
 Sets a `callback` for an `event`. You can set callback for those events: `start`, `stop`, `resolve`, `reject`, `end`.
+
+**Example:**
+
+```javascript
+queue.enqueue([…]);
+
+queue.on("resolve", output => …);
+queue.on("reject", output => …);
+queue.on("end", () => …);
+```
 
 #### **public** `.start()`
 
