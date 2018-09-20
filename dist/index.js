@@ -85,26 +85,19 @@ var Queue = function (_EventEmitter) {
 
 
   /**
-   * @type    {Object}  options
-   * @type    {number}  options.concurrent  How many tasks should be resolved at a time
-   * @type    {number}  options.interval    How often should new tasks be resolved (ms)
-   * @type    {boolean} options.start       If should resolve new tasks automatically
+   * @type    {boolean} Whether the queue has already started
    * @access  public
    */
 
 
   /**
-   * @type    {IntervalID}
+   * @type    {number}  Amount of tasks currently handled by the Queue
    * @access  private
    */
 
+
   /**
-   * A collection to store unresolved tasks. We use a Map here because V8 uses a
-   * variant of hash tables that generally have O(1) complexity for retrieval
-   * and lookup.
-   *
-   * @see     https://codereview.chromium.org/220293002/
-   * @type    {Map}
+   * @type    {number}  Used to generate unique id for each task
    * @access  private
    */
   function Queue() {
@@ -122,6 +115,7 @@ var Queue = function (_EventEmitter) {
       start: true
     };
     _this.started = false;
+    _this.stopped = false;
 
 
     _this.options = (0, _extends3.default)({}, _this.options, options);
@@ -145,19 +139,32 @@ var Queue = function (_EventEmitter) {
 
 
   /**
-   * @type    {boolean} Whether the queue has already started
+   * @type    {boolean} Whether the queue has been forced to stop
    * @access  public
    */
 
 
   /**
-   * @type    {number}  Amount of tasks currently handled by the Queue
-   * @access  private
+   * @type    {Object}  options
+   * @type    {number}  options.concurrent  How many tasks should be resolved at a time
+   * @type    {number}  options.interval    How often should new tasks be resolved (ms)
+   * @type    {boolean} options.start       If should resolve new tasks automatically
+   * @access  public
    */
 
 
   /**
-   * @type    {number}  Used to generate unique id for each task
+   * @type    {IntervalID}
+   * @access  private
+   */
+
+  /**
+   * A collection to store unresolved tasks. We use a Map here because V8 uses a
+   * variant of hash tables that generally have O(1) complexity for retrieval
+   * and lookup.
+   *
+   * @see     https://codereview.chromium.org/220293002/
+   * @type    {Map}
    * @access  private
    */
 
@@ -168,7 +175,9 @@ var Queue = function (_EventEmitter) {
       if (!this.started) {
         this.emit("start");
 
+        this.stopped = false;
         this.started = true;
+
         this.intervalId = setInterval(this.dequeue.bind(this), this.options.interval);
       }
     }
@@ -186,7 +195,9 @@ var Queue = function (_EventEmitter) {
     value: function stop() {
       this.emit("stop");
 
+      this.stopped = true;
       this.started = false;
+
       clearInterval(this.intervalId);
     }
 
@@ -295,9 +306,9 @@ var Queue = function (_EventEmitter) {
         throw new Error("You must provide a function, not " + (typeof tasks === "undefined" ? "undefined" : (0, _typeof3.default)(tasks)) + ".");
       }
 
-      // (Re)start the queue if new tasks are being added and the queue should
-      // resolve new tasks automatically:
-      if (this.options.start) {
+      // Start the queue if the queue should resolve new tasks automatically and
+      // the queue hasn't been forced to stop:
+      if (this.options.start && !this.stopped) {
         this.start();
       }
 

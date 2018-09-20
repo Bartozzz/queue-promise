@@ -71,6 +71,12 @@ export default class Queue extends EventEmitter {
   started = false;
 
   /**
+   * @type    {boolean} Whether the queue has been forced to stop
+   * @access  public
+   */
+  stopped = false;
+
+  /**
    * Initializes a new Queue instance with provided options.
    *
    * @param   {Object}  options
@@ -103,7 +109,9 @@ export default class Queue extends EventEmitter {
     if (!this.started) {
       this.emit("start");
 
+      this.stopped = false;
       this.started = true;
+
       this.intervalId = setInterval(
         this.dequeue.bind(this),
         this.options.interval
@@ -121,7 +129,9 @@ export default class Queue extends EventEmitter {
   stop() {
     this.emit("stop");
 
+    this.stopped = true;
     this.started = false;
+
     clearInterval(this.intervalId);
   }
 
@@ -195,9 +205,9 @@ export default class Queue extends EventEmitter {
       throw new Error(`You must provide a function, not ${typeof tasks}.`);
     }
 
-    // (Re)start the queue if new tasks are being added and the queue should
-    // resolve new tasks automatically:
-    if (this.options.start) {
+    // Start the queue if the queue should resolve new tasks automatically and
+    // the queue hasn't been forced to stop:
+    if (this.options.start && !this.stopped) {
       this.start();
     }
 
