@@ -146,6 +146,11 @@ export default class Queue extends EventEmitter {
     if (--this.currentlyHandled === 0 && this.isEmpty) {
       this.emit("end");
       this.stop();
+
+      // Finalize doesn't force queue to stop as `Queue.stop()` does. New tasks
+      // should therefore be still resolved automatically if `options.start` was
+      // set to `true` (see `Queue.enqueue`):
+      this.stopped = false;
     }
   }
 
