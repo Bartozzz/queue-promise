@@ -6,6 +6,18 @@ import EventEmitter from "events";
  * functions concurrently at a specified speed. When a task is being resolved or
  * rejected, an event will be emitted.
  *
+ * @example
+ *    const queue = new Queue({
+ *      concurrent: 1,
+ *      interval: 2000
+ *    });
+ *
+ *    queue.on("resolve", data => console.log(data));
+ *    queue.on("reject", error => console.error(error));
+ *
+ *    queue.enqueue(asyncTaskA);
+ *    queue.enqueue([asyncTaskB, asyncTaskC]);
+ *
  * @class   Queue
  * @extends EventEmitter
  */
@@ -17,62 +29,66 @@ export default class Queue extends EventEmitter {
    *
    * @see     https://codereview.chromium.org/220293002/
    * @type    {Map}
+   * @access  private
    */
   tasks: Map<number, Function> = new Map();
 
   /**
-   * Used to generate unique id for each task.
-   *
-   * @type    {number}
+   * @type    {number}  Used to generate unique id for each task
+   * @access  private
    */
-  unique: number = 0;
-
-  /**
-   * Amount of tasks currently handled by the Queue.
-   *
-   * @type    {number}
-   */
-  current: number = 0;
-
-  /**
-   * @type    {Object}
-   */
-  options: Object = {};
-
-  /**
-   * @type    {boolean}
-   */
-  started: boolean = false;
+  uniqueId = 0;
 
   /**
    * @type    {IntervalID}
+   * @access  private
    */
-  interval: IntervalID;
+  intervalId: IntervalID;
+
+  /**
+   * @type    {number}  Amount of tasks currently handled by the Queue
+   * @access  private
+   */
+  currentlyHandled = 0;
+
+  /**
+   * @type    {Object}  options
+   * @type    {number}  options.concurrent  How many tasks should be resolved at a time
+   * @type    {number}  options.interval    How often should new tasks be resolved (ms)
+   * @type    {boolean} options.start       If should resolve new tasks automatically
+   * @access  public
+   */
+  options = {
+    concurrent: 5,
+    interval: 500,
+    start: true
+  };
+
+  /**
+   * @type    {boolean} Whether the queue has already started
+   * @access  public
+   */
+  started = false;
 
   /**
    * Initializes a new Queue instance with provided options.
    *
    * @param   {Object}  options
-   * @param   {number}  options.concurrent
-   * @param   {number}  options.interval
-   * @param   {boolean} options.start
+   * @param   {number}  options.concurrent  How many tasks should be resolved at a time
+   * @param   {number}  options.interval    How often should new tasks be resolved (ms)
+   * @param   {boolean} options.start       If should resolve new tasks automatically
+   * @return  {Queue}
    */
-  constructor(options: Object = {}): void {
+  constructor(options: Object = {}) {
     super();
 
-    this.options = {
-      concurrent: 5,
-      interval: 500,
-      start: true,
-      ...options
-    };
-
-    this.options.interval = parseInt(this.options.interval);
-    this.options.concurrent = parseInt(this.options.concurrent);
+    this.options = { ...this.options, ...options };
+    this.options.interval = parseInt(this.options.interval, 10);
+    this.options.concurrent = parseInt(this.options.concurrent, 10);
 
     // Backward compatibility:
     if (options.concurrency) {
-      this.options.concurrent = options.concurrency;
+      this.options.concurrent = parseInt(options.concurrency, 10);
     }
   }
 
@@ -83,12 +99,15 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  public
    */
-  start(): void {
+  start() {
     if (!this.started) {
       this.emit("start");
 
       this.started = true;
-      this.interval = setInterval(() => this.dequeue(), this.options.interval);
+      this.intervalId = setInterval(
+        this.dequeue.bind(this),
+        this.options.interval
+      );
     }
   }
 
@@ -99,11 +118,11 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  public
    */
-  stop(): void {
+  stop() {
     this.emit("stop");
 
     this.started = false;
-    clearInterval(this.interval);
+    clearInterval(this.intervalId);
   }
 
   /**
@@ -113,8 +132,8 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  private
    */
-  finalize(): void {
-    if (--this.current === 0 && this.isEmpty) {
+  finalize() {
+    if (--this.currentlyHandled === 0 && this.isEmpty) {
       this.emit("end");
       this.stop();
     }
@@ -123,21 +142,21 @@ export default class Queue extends EventEmitter {
   /**
    * Resolves n concurrent promises from the queue.
    *
-   * @return  {Promise<*>}
+   * @return  {Promise<any>}
    * @emits   resolve
    * @emits   reject
    * @access  public
    */
-  dequeue(): Promise<*> {
+  dequeue() {
     const promises = [];
 
     this.tasks.forEach((promise, id) => {
       // Maximum amount of parallel concurrencies:
-      if (this.current + 1 > this.options.concurrent) {
+      if (this.currentlyHandled >= this.options.concurrent) {
         return;
       }
 
-      this.current++;
+      this.currentlyHandled++;
       this.tasks.delete(id);
 
       promises.push(Promise.resolve(promise()));
@@ -161,36 +180,36 @@ export default class Queue extends EventEmitter {
   /**
    * Adds a promise to the queue.
    *
-   * @param   {Function|Array}  promise   Promise to add to the queue
-   * @throws  {Error}                     When promise is not a function
+   * @param   {Function|Array}  tasks     Tasks to add to the queue
+   * @throws  {Error}                     When task is not a function
    * @return  {void}
    * @access  public
    */
-  enqueue(promise: Function | Array<Function>): void {
-    if (Array.isArray(promise)) {
-      promise.map(p => this.enqueue(p));
+  enqueue(tasks: Function | Array<Function>) {
+    if (Array.isArray(tasks)) {
+      tasks.map(task => this.enqueue(task));
       return;
     }
 
-    if (typeof promise !== "function") {
-      throw new Error(`You must provide a function, not ${typeof promise}.`);
+    if (typeof tasks !== "function") {
+      throw new Error(`You must provide a function, not ${typeof tasks}.`);
     }
 
-    // (Re)start the queue if new tasks are being added and the queue has been
-    // automatically started before:
+    // (Re)start the queue if new tasks are being added and the queue should
+    // resolve new tasks automatically:
     if (this.options.start) {
       this.start();
     }
 
-    this.tasks.set(this.unique++, promise);
+    this.tasks.set(this.uniqueId++, tasks);
   }
 
   /**
    * @see     enqueue
    * @access  public
    */
-  add(promise: Function): void {
-    this.enqueue(promise);
+  add(tasks: Function | Array<Function>) {
+    this.enqueue(tasks);
   }
 
   /**
@@ -199,17 +218,17 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  public
    */
-  clear(): void {
+  clear() {
     this.tasks.clear();
   }
 
   /**
    * Checks whether the queue is empty, i.e. there's no tasks.
    *
-   * @type  {boolean}
+   * @type    {boolean}
    * @access  public
    */
-  get isEmpty(): boolean {
+  get isEmpty() {
     return this.tasks.size === 0;
   }
 }

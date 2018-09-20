@@ -55,6 +55,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * functions concurrently at a specified speed. When a task is being resolved or
  * rejected, an event will be emitted.
  *
+ * @example
+ *    const queue = new Queue({
+ *      concurrent: 1,
+ *      interval: 2000
+ *    });
+ *
+ *    queue.on("resolve", data => console.log(data));
+ *    queue.on("reject", error => console.error(error));
+ *
+ *    queue.enqueue(asyncTaskA);
+ *    queue.enqueue([asyncTaskB, asyncTaskC]);
+ *
  * @class   Queue
  * @extends EventEmitter
  */
@@ -65,21 +77,25 @@ var Queue = function (_EventEmitter) {
    * Initializes a new Queue instance with provided options.
    *
    * @param   {Object}  options
-   * @param   {number}  options.concurrent
-   * @param   {number}  options.interval
-   * @param   {boolean} options.start
+   * @param   {number}  options.concurrent  How many tasks should be resolved at a time
+   * @param   {number}  options.interval    How often should new tasks be resolved (ms)
+   * @param   {boolean} options.start       If should resolve new tasks automatically
+   * @return  {Queue}
    */
 
 
   /**
-   * @type    {boolean}
+   * @type    {Object}  options
+   * @type    {number}  options.concurrent  How many tasks should be resolved at a time
+   * @type    {number}  options.interval    How often should new tasks be resolved (ms)
+   * @type    {boolean} options.start       If should resolve new tasks automatically
+   * @access  public
    */
 
 
   /**
-   * Amount of tasks currently handled by the Queue.
-   *
-   * @type    {number}
+   * @type    {IntervalID}
+   * @access  private
    */
 
   /**
@@ -89,6 +105,7 @@ var Queue = function (_EventEmitter) {
    *
    * @see     https://codereview.chromium.org/220293002/
    * @type    {Map}
+   * @access  private
    */
   function Queue() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -97,24 +114,23 @@ var Queue = function (_EventEmitter) {
     var _this = (0, _possibleConstructorReturn3.default)(this, (Queue.__proto__ || (0, _getPrototypeOf2.default)(Queue)).call(this));
 
     _this.tasks = new _map2.default();
-    _this.unique = 0;
-    _this.current = 0;
-    _this.options = {};
-    _this.started = false;
-
-
-    _this.options = (0, _extends3.default)({
+    _this.uniqueId = 0;
+    _this.currentlyHandled = 0;
+    _this.options = {
       concurrent: 5,
       interval: 500,
       start: true
-    }, options);
+    };
+    _this.started = false;
 
-    _this.options.interval = parseInt(_this.options.interval);
-    _this.options.concurrent = parseInt(_this.options.concurrent);
+
+    _this.options = (0, _extends3.default)({}, _this.options, options);
+    _this.options.interval = parseInt(_this.options.interval, 10);
+    _this.options.concurrent = parseInt(_this.options.concurrent, 10);
 
     // Backward compatibility:
     if (options.concurrency) {
-      _this.options.concurrent = options.concurrency;
+      _this.options.concurrent = parseInt(options.concurrency, 10);
     }
     return _this;
   }
@@ -129,34 +145,31 @@ var Queue = function (_EventEmitter) {
 
 
   /**
-   * @type    {IntervalID}
+   * @type    {boolean} Whether the queue has already started
+   * @access  public
    */
 
 
   /**
-   * @type    {Object}
+   * @type    {number}  Amount of tasks currently handled by the Queue
+   * @access  private
    */
 
 
   /**
-   * Used to generate unique id for each task.
-   *
-   * @type    {number}
+   * @type    {number}  Used to generate unique id for each task
+   * @access  private
    */
 
 
   (0, _createClass3.default)(Queue, [{
     key: "start",
     value: function start() {
-      var _this2 = this;
-
       if (!this.started) {
         this.emit("start");
 
         this.started = true;
-        this.interval = setInterval(function () {
-          return _this2.dequeue();
-        }, this.options.interval);
+        this.intervalId = setInterval(this.dequeue.bind(this), this.options.interval);
       }
     }
 
@@ -174,7 +187,7 @@ var Queue = function (_EventEmitter) {
       this.emit("stop");
 
       this.started = false;
-      clearInterval(this.interval);
+      clearInterval(this.intervalId);
     }
 
     /**
@@ -188,7 +201,7 @@ var Queue = function (_EventEmitter) {
   }, {
     key: "finalize",
     value: function finalize() {
-      if (--this.current === 0 && this.isEmpty) {
+      if (--this.currentlyHandled === 0 && this.isEmpty) {
         this.emit("end");
         this.stop();
       }
@@ -197,7 +210,7 @@ var Queue = function (_EventEmitter) {
     /**
      * Resolves n concurrent promises from the queue.
      *
-     * @return  {Promise<*>}
+     * @return  {Promise<any>}
      * @emits   resolve
      * @emits   reject
      * @access  public
@@ -206,18 +219,18 @@ var Queue = function (_EventEmitter) {
   }, {
     key: "dequeue",
     value: function dequeue() {
-      var _this3 = this;
+      var _this2 = this;
 
       var promises = [];
 
       this.tasks.forEach(function (promise, id) {
         // Maximum amount of parallel concurrencies:
-        if (_this3.current + 1 > _this3.options.concurrent) {
+        if (_this2.currentlyHandled >= _this2.options.concurrent) {
           return;
         }
 
-        _this3.current++;
-        _this3.tasks.delete(id);
+        _this2.currentlyHandled++;
+        _this2.tasks.delete(id);
 
         promises.push(_promise2.default.resolve(promise()));
       });
@@ -230,7 +243,7 @@ var Queue = function (_EventEmitter) {
         try {
           for (var _iterator = (0, _getIterator3.default)(values), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var output = _step.value;
-            _this3.emit("resolve", output);
+            _this2.emit("resolve", output);
           }
         } catch (err) {
           _didIteratorError = true;
@@ -249,10 +262,10 @@ var Queue = function (_EventEmitter) {
 
         return values;
       }).catch(function (error) {
-        _this3.emit("reject", error);
+        _this2.emit("reject", error);
         return error;
       }).then(function (output) {
-        _this3.finalize();
+        _this2.finalize();
         return output;
       });
     }
@@ -260,35 +273,35 @@ var Queue = function (_EventEmitter) {
     /**
      * Adds a promise to the queue.
      *
-     * @param   {Function|Array}  promise   Promise to add to the queue
-     * @throws  {Error}                     When promise is not a function
+     * @param   {Function|Array}  tasks     Tasks to add to the queue
+     * @throws  {Error}                     When task is not a function
      * @return  {void}
      * @access  public
      */
 
   }, {
     key: "enqueue",
-    value: function enqueue(promise) {
-      var _this4 = this;
+    value: function enqueue(tasks) {
+      var _this3 = this;
 
-      if (Array.isArray(promise)) {
-        promise.map(function (p) {
-          return _this4.enqueue(p);
+      if (Array.isArray(tasks)) {
+        tasks.map(function (task) {
+          return _this3.enqueue(task);
         });
         return;
       }
 
-      if (typeof promise !== "function") {
-        throw new Error("You must provide a function, not " + (typeof promise === "undefined" ? "undefined" : (0, _typeof3.default)(promise)) + ".");
+      if (typeof tasks !== "function") {
+        throw new Error("You must provide a function, not " + (typeof tasks === "undefined" ? "undefined" : (0, _typeof3.default)(tasks)) + ".");
       }
 
-      // (Re)start the queue if new tasks are being added and the queue has been
-      // automatically started before:
+      // (Re)start the queue if new tasks are being added and the queue should
+      // resolve new tasks automatically:
       if (this.options.start) {
         this.start();
       }
 
-      this.tasks.set(this.unique++, promise);
+      this.tasks.set(this.uniqueId++, tasks);
     }
 
     /**
@@ -298,8 +311,8 @@ var Queue = function (_EventEmitter) {
 
   }, {
     key: "add",
-    value: function add(promise) {
-      this.enqueue(promise);
+    value: function add(tasks) {
+      this.enqueue(tasks);
     }
 
     /**
@@ -318,7 +331,7 @@ var Queue = function (_EventEmitter) {
     /**
      * Checks whether the queue is empty, i.e. there's no tasks.
      *
-     * @type  {boolean}
+     * @type    {boolean}
      * @access  public
      */
 
@@ -332,4 +345,4 @@ var Queue = function (_EventEmitter) {
 }(_events2.default);
 
 exports.default = Queue;
-module.exports = exports["default"];
+module.exports = exports.default;
