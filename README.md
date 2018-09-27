@@ -23,9 +23,12 @@ $ npm install queue-promise
 import Queue from "queue-promise";
 
 const queue = new Queue({
-  concurrent: 1,  // resolve 1 task at a time
-  interval: 2000, // resolve new tasks each 2000ms,
-  start: true,    // automatically resolve new tasks when they are added
+  // How many tasks should be resolved at a time (defaults to `5`):
+  concurrent: 1,
+  // How often should new tasks be resolved (in ms – defaults to `500`):
+  interval: 2000,
+  // If should resolve new tasks automatically when they are added (defaults to `true`):
+  start: true
 });
 
 queue.on("resolve", data => console.log(data));
@@ -43,36 +46,33 @@ queue.enqueue(asyncTaskD); // resolved/rejected after 6s
 
 Create a new `Queue` instance.
 
-| Option       | Default | Description                                                                  |
-| :----------- | :------ | :--------------------------------------------------------------------------- |
-| `concurrent` | `5`     | How many tasks can be handled at the same time                               |
-| `interval`   | `500`   | How often should new tasks be handled (in ms)                                |
-| `start`      | `true`  | Whether we should automatically resolve new tasks as soon as they are added  |
+| Option       | Default | Description                                                                 |
+| :----------- | :------ | :-------------------------------------------------------------------------- |
+| `concurrent` | `5`     | How many tasks can be handled at the same time                              |
+| `interval`   | `500`   | How often should new tasks be handled (in ms)                               |
+| `start`      | `true`  | Whether we should automatically resolve new tasks as soon as they are added |
 
-#### **public** `.enqueue(task)`/`.add(task)`
+#### **public** `.enqueue(tasks)`/`.add(tasks)`
 
-Puts a new task on the stack. Tasks should be an async function or return a promise. Throws an error if the provided `task` is not a valid function.
+Puts a new task on the stack. A task should be an async function (ES2017) or return a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Throws an error if the provided `task` is not a valid function.
 
 **Example:**
 
 ```javascript
 async function getRepos(user) {
   return await github.getRepos(user);
-};
+}
 
 queue.enqueue(getRepos("userA"));
 queue.enqueue(getRepos("userB"));
 
 // …equivalent to:
-queue.enqueue([
-  getRepos("userA"),
-  getRepos("userB"),
-]);
+queue.enqueue([getRepos("userA"), getRepos("userB")]);
 ```
 
 #### **public** `.dequeue()`
 
-Resolves _n_ concurrent promises from the queue. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+Manually resolves _n_ concurrent (based od `options.concurrent`) promises from the queue. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Is called automatically if `options.start` is set to `true`. Emits `resolve` and `reject` events.
 
 **Example:**
 
@@ -85,7 +85,7 @@ const userA = await queue.dequeue();
 const userB = await queue.dequeue();
 
 // If "concurrent" is set to 2, two promises are resolved concurrently:
-const users = await queue.dequeue();
+const [userA, userB] = await queue.dequeue();
 ```
 
 #### **public** `.on(event, callback)`
@@ -97,8 +97,8 @@ Sets a `callback` for an `event`. You can set callback for those events: `start`
 ```javascript
 queue.enqueue([…]);
 
-queue.on("resolve", output => …);
-queue.on("reject", output => …);
+queue.on("resolve", data => …);
+queue.on("reject", error => …);
 queue.on("end", () => …);
 ```
 
@@ -106,9 +106,21 @@ queue.on("end", () => …);
 
 Starts the queue – it will automatically dequeue tasks periodically. Emits `start` event.
 
+```javascript
+queue.enqueue(getRepos("userA"));
+queue.enqueue(getRepos("userB"));
+queue.enqueue(getRepos("userC"));
+queue.enqueue(getRepos("userD"));
+queue.start();
+
+// No need to call `dequeue` – you can just listen for events:
+queue.on("resolve", data => …);
+queue.on("reject", error => …);
+```
+
 #### **public** `.stop()`
 
-Stops the queue. Emits `stop` event.
+Forces the queue to stop. New tasks will not be resolved automatically even if `options.start` was set to `true`. Emits `stop` event.
 
 #### **public** `.clear()`
 
@@ -117,6 +129,10 @@ Removes all tasks from the queue.
 #### **public** `.started`
 
 Whether the queue has been started or not.
+
+#### **public** `.stopped`
+
+Whether the queue has been forced to stop.
 
 #### **public** `.isEmpty`
 

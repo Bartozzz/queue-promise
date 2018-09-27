@@ -1,11 +1,12 @@
 {
-  "presets": ["env", "flow"],
-
+  "presets": [
+    ["@babel/preset-env", { "targets": { "node": "8" } }],
+    ["@babel/preset-flow"]
+  ],
   "plugins": [
     "add-module-exports",
-    "transform-runtime",
-    "transform-class-properties",
-    "transform-object-rest-spread",
-    "transform-async-to-generator"
+    "@babel/plugin-proposal-async-generator-functions",
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-object-rest-spread"
   ]
 }
