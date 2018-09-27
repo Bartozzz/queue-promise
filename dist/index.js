@@ -3,52 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
-var _getIterator2 = require("babel-runtime/core-js/get-iterator");
-
-var _getIterator3 = _interopRequireDefault(_getIterator2);
-
-var _promise = require("babel-runtime/core-js/promise");
-
-var _promise2 = _interopRequireDefault(_promise);
-
-var _extends2 = require("babel-runtime/helpers/extends");
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _map = require("babel-runtime/core-js/map");
-
-var _map2 = _interopRequireDefault(_map);
-
-var _getPrototypeOf = require("babel-runtime/core-js/object/get-prototype-of");
-
-var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _possibleConstructorReturn2 = require("babel-runtime/helpers/possibleConstructorReturn");
-
-var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
-
-var _inherits2 = require("babel-runtime/helpers/inherits");
-
-var _inherits3 = _interopRequireDefault(_inherits2);
-
-var _events = require("events");
-
-var _events2 = _interopRequireDefault(_events);
+var _events = _interopRequireDefault(require("events"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 /**
  * A small and simple library for promise-based queues. It will resolve enqueued
@@ -70,94 +33,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @class   Queue
  * @extends EventEmitter
  */
-var Queue = function (_EventEmitter) {
-  (0, _inherits3.default)(Queue, _EventEmitter);
-
-  /**
-   * Initializes a new Queue instance with provided options.
-   *
-   * @param   {Object}  options
-   * @param   {number}  options.concurrent  How many tasks should be resolved at a time
-   * @param   {number}  options.interval    How often should new tasks be resolved (ms)
-   * @param   {boolean} options.start       If should resolve new tasks automatically
-   * @return  {Queue}
-   */
-
-
-  /**
-   * @type    {boolean} Whether the queue has already started
-   * @access  public
-   */
-
-
-  /**
-   * @type    {number}  Amount of tasks currently handled by the Queue
-   * @access  private
-   */
-
-
-  /**
-   * @type    {number}  Used to generate unique id for each task
-   * @access  private
-   */
-  function Queue() {
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    (0, _classCallCheck3.default)(this, Queue);
-
-    var _this = (0, _possibleConstructorReturn3.default)(this, (Queue.__proto__ || (0, _getPrototypeOf2.default)(Queue)).call(this));
-
-    _this.tasks = new _map2.default();
-    _this.uniqueId = 0;
-    _this.currentlyHandled = 0;
-    _this.options = {
-      concurrent: 5,
-      interval: 500,
-      start: true
-    };
-    _this.started = false;
-    _this.stopped = false;
-
-
-    _this.options = (0, _extends3.default)({}, _this.options, options);
-    _this.options.interval = parseInt(_this.options.interval, 10);
-    _this.options.concurrent = parseInt(_this.options.concurrent, 10);
-
-    // Backward compatibility:
-    if (options.concurrency) {
-      _this.options.concurrent = parseInt(options.concurrency, 10);
-    }
-    return _this;
-  }
-
-  /**
-   * Starts the queue if it has not been started yet.
-   *
-   * @emits   start
-   * @return  {void}
-   * @access  public
-   */
-
-
-  /**
-   * @type    {boolean} Whether the queue has been forced to stop
-   * @access  public
-   */
-
-
-  /**
-   * @type    {Object}  options
-   * @type    {number}  options.concurrent  How many tasks should be resolved at a time
-   * @type    {number}  options.interval    How often should new tasks be resolved (ms)
-   * @type    {boolean} options.start       If should resolve new tasks automatically
-   * @access  public
-   */
-
-
-  /**
-   * @type    {IntervalID}
-   * @access  private
-   */
-
+class Queue extends _events.default {
   /**
    * A collection to store unresolved tasks. We use a Map here because V8 uses a
    * variant of hash tables that generally have O(1) complexity for retrieval
@@ -168,192 +44,223 @@ var Queue = function (_EventEmitter) {
    * @access  private
    */
 
+  /**
+   * @type    {number}  Used to generate unique id for each task
+   * @access  private
+   */
 
-  (0, _createClass3.default)(Queue, [{
-    key: "start",
-    value: function start() {
-      if (!this.started) {
-        this.emit("start");
+  /**
+   * @type    {IntervalID}
+   * @access  private
+   */
 
-        this.stopped = false;
-        this.started = true;
+  /**
+   * @type    {number}  Amount of tasks currently handled by the Queue
+   * @access  private
+   */
 
-        this.intervalId = setInterval(this.dequeue.bind(this), this.options.interval);
-      }
+  /**
+   * @type    {Object}  options
+   * @type    {number}  options.concurrent  How many tasks should be resolved at a time
+   * @type    {number}  options.interval    How often should new tasks be resolved (ms)
+   * @type    {boolean} options.start       If should resolve new tasks automatically
+   * @access  public
+   */
+
+  /**
+   * @type    {boolean} Whether the queue has already started
+   * @access  public
+   */
+
+  /**
+   * @type    {boolean} Whether the queue has been forced to stop
+   * @access  public
+   */
+
+  /**
+   * Initializes a new Queue instance with provided options.
+   *
+   * @param   {Object}  options
+   * @param   {number}  options.concurrent  How many tasks should be resolved at a time
+   * @param   {number}  options.interval    How often should new tasks be resolved (ms)
+   * @param   {boolean} options.start       If should resolve new tasks automatically
+   * @return  {Queue}
+   */
+  constructor(options = {}) {
+    super();
+
+    _defineProperty(this, "tasks", new Map());
+
+    _defineProperty(this, "uniqueId", 0);
+
+    _defineProperty(this, "intervalId", void 0);
+
+    _defineProperty(this, "currentlyHandled", 0);
+
+    _defineProperty(this, "options", {
+      concurrent: 5,
+      interval: 500,
+      start: true
+    });
+
+    _defineProperty(this, "started", false);
+
+    _defineProperty(this, "stopped", false);
+
+    this.options = _objectSpread({}, this.options, options);
+    this.options.interval = parseInt(this.options.interval, 10);
+    this.options.concurrent = parseInt(this.options.concurrent, 10); // Backward compatibility:
+
+    if (options.concurrency) {
+      this.options.concurrent = parseInt(options.concurrency, 10);
     }
+  }
+  /**
+   * Starts the queue if it has not been started yet.
+   *
+   * @emits   start
+   * @return  {void}
+   * @access  public
+   */
 
-    /**
-     * Stops the queue.
-     *
-     * @emits   stop
-     * @return  {void}
-     * @access  public
-     */
 
-  }, {
-    key: "stop",
-    value: function stop() {
-      this.emit("stop");
-
-      this.stopped = true;
-      this.started = false;
-
-      clearInterval(this.intervalId);
+  start() {
+    if (!this.started) {
+      this.emit("start");
+      this.stopped = false;
+      this.started = true;
+      this.intervalId = setInterval(this.dequeue.bind(this), this.options.interval);
     }
+  }
+  /**
+   * Stops the queue.
+   *
+   * @emits   stop
+   * @return  {void}
+   * @access  public
+   */
 
-    /**
-     * Goes to the next request and stops the loop if there is no requests left.
-     *
-     * @emits   end
-     * @return  {void}
-     * @access  private
-     */
 
-  }, {
-    key: "finalize",
-    value: function finalize() {
-      if (--this.currentlyHandled === 0 && this.isEmpty) {
-        this.emit("end");
-        this.stop();
-      }
+  stop() {
+    this.emit("stop");
+    this.stopped = true;
+    this.started = false;
+    clearInterval(this.intervalId);
+  }
+  /**
+   * Goes to the next request and stops the loop if there is no requests left.
+   *
+   * @emits   end
+   * @return  {void}
+   * @access  private
+   */
+
+
+  finalize() {
+    if (--this.currentlyHandled === 0 && this.isEmpty) {
+      this.emit("end");
+      this.stop(); // Finalize doesn't force queue to stop as `Queue.stop()` does. New tasks
+      // should therefore be still resolved automatically if `options.start` was
+      // set to `true` (see `Queue.enqueue`):
+
+      this.stopped = false;
     }
+  }
+  /**
+   * Resolves n concurrent promises from the queue.
+   *
+   * @return  {Promise<any>}
+   * @emits   resolve
+   * @emits   reject
+   * @access  public
+   */
 
-    /**
-     * Resolves n concurrent promises from the queue.
-     *
-     * @return  {Promise<any>}
-     * @emits   resolve
-     * @emits   reject
-     * @access  public
-     */
 
-  }, {
-    key: "dequeue",
-    value: function dequeue() {
-      var _this2 = this;
-
-      var promises = [];
-
-      this.tasks.forEach(function (promise, id) {
-        // Maximum amount of parallel concurrencies:
-        if (_this2.currentlyHandled >= _this2.options.concurrent) {
-          return;
-        }
-
-        _this2.currentlyHandled++;
-        _this2.tasks.delete(id);
-
-        promises.push(_promise2.default.resolve(promise()));
-      });
-
-      return _promise2.default.all(promises).then(function (values) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = (0, _getIterator3.default)(values), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var output = _step.value;
-            _this2.emit("resolve", output);
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-
-        return values;
-      }).catch(function (error) {
-        _this2.emit("reject", error);
-        return error;
-      }).then(function (output) {
-        _this2.finalize();
-        return output;
-      });
-    }
-
-    /**
-     * Adds a promise to the queue.
-     *
-     * @param   {Function|Array}  tasks     Tasks to add to the queue
-     * @throws  {Error}                     When task is not a function
-     * @return  {void}
-     * @access  public
-     */
-
-  }, {
-    key: "enqueue",
-    value: function enqueue(tasks) {
-      var _this3 = this;
-
-      if (Array.isArray(tasks)) {
-        tasks.map(function (task) {
-          return _this3.enqueue(task);
-        });
+  dequeue() {
+    const promises = [];
+    this.tasks.forEach((promise, id) => {
+      // Maximum amount of parallel concurrencies:
+      if (this.currentlyHandled >= this.options.concurrent) {
         return;
       }
 
-      if (typeof tasks !== "function") {
-        throw new Error("You must provide a function, not " + (typeof tasks === "undefined" ? "undefined" : (0, _typeof3.default)(tasks)) + ".");
-      }
+      this.currentlyHandled++;
+      this.tasks.delete(id);
+      promises.push(Promise.resolve(promise()));
+    });
+    return Promise.all(promises).then(values => {
+      for (let output of values) this.emit("resolve", output);
 
-      // Start the queue if the queue should resolve new tasks automatically and
-      // the queue hasn't been forced to stop:
-      if (this.options.start && !this.stopped) {
-        this.start();
-      }
+      return values;
+    }).catch(error => {
+      this.emit("reject", error);
+      return error;
+    }).then(output => {
+      this.finalize();
+      return output;
+    });
+  }
+  /**
+   * Adds a promise to the queue.
+   *
+   * @param   {Function|Array}  tasks     Tasks to add to the queue
+   * @throws  {Error}                     When task is not a function
+   * @return  {void}
+   * @access  public
+   */
 
-      this.tasks.set(this.uniqueId++, tasks);
+
+  enqueue(tasks) {
+    if (Array.isArray(tasks)) {
+      tasks.map(task => this.enqueue(task));
+      return;
     }
 
-    /**
-     * @see     enqueue
-     * @access  public
-     */
+    if (typeof tasks !== "function") {
+      throw new Error(`You must provide a function, not ${typeof tasks}.`);
+    } // Start the queue if the queue should resolve new tasks automatically and
+    // the queue hasn't been forced to stop:
 
-  }, {
-    key: "add",
-    value: function add(tasks) {
-      this.enqueue(tasks);
+
+    if (this.options.start && !this.stopped) {
+      this.start();
     }
 
-    /**
-     * Removes all tasks from the queue.
-     *
-     * @return  {void}
-     * @access  public
-     */
+    this.tasks.set(this.uniqueId++, tasks);
+  }
+  /**
+   * @see     enqueue
+   * @access  public
+   */
 
-  }, {
-    key: "clear",
-    value: function clear() {
-      this.tasks.clear();
-    }
 
-    /**
-     * Checks whether the queue is empty, i.e. there's no tasks.
-     *
-     * @type    {boolean}
-     * @access  public
-     */
+  add(tasks) {
+    this.enqueue(tasks);
+  }
+  /**
+   * Removes all tasks from the queue.
+   *
+   * @return  {void}
+   * @access  public
+   */
 
-  }, {
-    key: "isEmpty",
-    get: function get() {
-      return this.tasks.size === 0;
-    }
-  }]);
-  return Queue;
-}(_events2.default);
+
+  clear() {
+    this.tasks.clear();
+  }
+  /**
+   * Checks whether the queue is empty, i.e. there's no tasks.
+   *
+   * @type    {boolean}
+   * @access  public
+   */
+
+
+  get isEmpty() {
+    return this.tasks.size === 0;
+  }
+
+}
 
 exports.default = Queue;
 module.exports = exports.default;
