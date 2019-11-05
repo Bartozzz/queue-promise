@@ -187,7 +187,12 @@ class Queue extends _events.default {
       this.currentlyHandled++;
       this.tasks.delete(id);
       promises.push(Promise.resolve(promise()));
-    });
+    }); // https://github.com/Bartozzz/queue-promise/issues/60
+
+    if (promises.length === 0) {
+      return;
+    }
+
     return Promise.all(promises).then(values => {
       for (let output of values) this.emit("resolve", output);
 
