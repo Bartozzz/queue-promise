@@ -143,7 +143,9 @@ export default class Queue extends EventEmitter {
    * @access  private
    */
   finalize() {
-    if (--this.currentlyHandled === 0 && this.isEmpty) {
+    this.currentlyHandled -= 1;
+
+    if (this.currentlyHandled === 0 && this.isEmpty) {
       this.emit("end");
       this.stop();
 
@@ -166,10 +168,11 @@ export default class Queue extends EventEmitter {
     const promises = [];
 
     this.tasks.forEach((promise, id) => {
-      // Maximum amount of parallel concurrencies:
+      // Maximum amount of parallel tasks:
       if (this.currentlyHandled < this.options.concurrent) {
         this.currentlyHandled++;
         this.tasks.delete(id);
+
         promises.push(
           Promise.resolve(promise())
             .then(value => this.emit("resolve", value))
@@ -182,7 +185,8 @@ export default class Queue extends EventEmitter {
       }
     });
 
-    // Note: Promise.all will reject if any of the concurrent promises fails, regardless if they are finished yet!
+    // Note: Promise.all will reject if any of the concurrent promises fails,
+    // regardless if they are finished yet!
     return Promise.all(promises);
   }
 
@@ -205,7 +209,7 @@ export default class Queue extends EventEmitter {
     }
 
     // Start the queue if the queue should resolve new tasks automatically and
-    // the queue hasn't been forced to stop:
+    // hasn't been forced to stop:
     if (this.options.start && !this.stopped) {
       this.start();
     }
