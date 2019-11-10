@@ -167,34 +167,23 @@ export default class Queue extends EventEmitter {
 
     this.tasks.forEach((promise, id) => {
       // Maximum amount of parallel concurrencies:
-      if (this.currentlyHandled >= this.options.concurrent) {
-        return;
+      if (this.currentlyHandled < this.options.concurrent) {
+        this.currentlyHandled++;
+        this.tasks.delete(id);
+        promises.push(
+          Promise.resolve(promise())
+            .then(value => this.emit("resolve", value))
+            .catch(error => this.emit("reject", error))
+            .finally(() => {
+              this.emit("dequeue");
+              this.finalize();
+            })
+        );
       }
-
-      this.currentlyHandled++;
-      this.tasks.delete(id);
-
-      promises.push(Promise.resolve(promise()));
     });
 
-    // https://github.com/Bartozzz/queue-promise/issues/60
-    if (promises.length === 0) {
-      return;
-    }
-
-    return Promise.all(promises)
-      .then(values => {
-        for (let output of values) this.emit("resolve", output);
-        return values;
-      })
-      .catch(error => {
-        this.emit("reject", error);
-        return error;
-      })
-      .then(output => {
-        this.finalize();
-        return output;
-      });
+    // Note: Promise.all will reject if any of the concurrent promises fails, regardless if they are finished yet!
+    return Promise.all(promises);
   }
 
   /**
