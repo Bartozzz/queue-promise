@@ -175,11 +175,21 @@ export default class Queue extends EventEmitter {
 
         promises.push(
           Promise.resolve(promise())
-            .then(value => this.emit("resolve", value))
-            .catch(error => this.emit("reject", error))
-            .finally(() => {
+            .then(value => {
+              this.emit("resolve", value);
+
+              return value;
+            })
+            .catch(error => {
+              this.emit("reject", error);
+
+              return error;
+            })
+            .finally(value => {
               this.emit("dequeue");
               this.finalize();
+
+              return value;
             })
         );
       }
