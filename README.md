@@ -7,7 +7,7 @@
 [![npm downloads](https://img.shields.io/npm/dt/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
 <br>
 
-`queue-promise` is a small, dependency-free library for promise-based queues. It will resolve enqueued functions concurrently at a given speed. When a task is being resolved or rejected, an event will be emitted.
+`queue-promise` is a small, dependency-free library for promise-based queues. It will resolve enqueued tasks concurrently at a given speed. When a task is being resolved or rejected, an event will be emitted.
 
 </div>
 
@@ -23,13 +23,17 @@ $ npm install queue-promise
 import Queue from "queue-promise";
 
 const queue = new Queue({
-  // How many tasks should be resolved at a time (defaults to `5`):
+  // How many tasks should be executed in parallel (defaults to `5`):
   concurrent: 1,
-  // How often should new tasks be resolved (in ms – defaults to `500`):
+  // How often should new tasks be executed (in ms – defaults to `500`):
   interval: 2000,
-  // If should resolve new tasks automatically when they are added (defaults to `true`):
+  // If should resolve new tasks automatically when added (defaults to `true`):
   start: true
 });
+
+queue.on("start", () => /* … */);
+queue.on("stop", () => /* … */);
+queue.on("end", () => /* … */);
 
 queue.on("resolve", data => console.log(data));
 queue.on("reject", error => console.error(error));
@@ -48,13 +52,13 @@ Create a new `Queue` instance.
 
 | Option       | Default | Description                                                                 |
 | :----------- | :------ | :-------------------------------------------------------------------------- |
-| `concurrent` | `5`     | How many tasks can be handled at the same time                              |
-| `interval`   | `500`   | How often should new tasks be handled (in ms)                               |
-| `start`      | `true`  | Whether we should automatically resolve new tasks as soon as they are added |
+| `concurrent` | `5`     | How many tasks should be executed in parallel                               |
+| `interval`   | `500`   | How often should new tasks be executed (in ms)                              |
+| `start`      | `true`  | Whether it should automatically resolve new tasks as soon as they are added |
 
 #### **public** `.enqueue(tasks)`/`.add(tasks)`
 
-Puts a new task on the stack. A task should be an async function (ES2017) or return a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Throws an error if the provided `task` is not a valid function.
+Adds a new task to the queue. A task should be an [async function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) (ES2017) or return a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Throws an error if the provided `task` is not a valid function.
 
 **Example:**
 
@@ -95,10 +99,10 @@ Sets a `callback` for an `event`. You can set callback for those events: `start`
 **Example:**
 
 ```javascript
-queue.enqueue([…]);
-
 queue.on("resolve", data => …);
 queue.on("reject", error => …);
+queue.on("start", () => …);
+queue.on("stop", () => …);
 queue.on("end", () => …);
 ```
 
