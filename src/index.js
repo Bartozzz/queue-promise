@@ -106,7 +106,7 @@ export default class Queue extends EventEmitter {
    * @access  public
    */
   start() {
-    if (!this.started) {
+    if (!this.started && !this.isEmpty) {
       this.emit("start");
 
       this.stopped = false;
@@ -143,7 +143,9 @@ export default class Queue extends EventEmitter {
    * @access  private
    */
   finalize() {
-    if (--this.currentlyHandled === 0 && this.isEmpty) {
+    this.currentlyHandled -= 1;
+
+    if (this.currentlyHandled === 0 && this.isEmpty) {
       this.emit("end");
       this.stop();
 
@@ -162,34 +164,38 @@ export default class Queue extends EventEmitter {
    * @emits   reject
    * @access  public
    */
-  dequeue() {
+  async dequeue() {
     const promises = [];
 
     this.tasks.forEach((promise, id) => {
-      // Maximum amount of parallel concurrencies:
-      if (this.currentlyHandled >= this.options.concurrent) {
-        return;
+      // Maximum amount of parallel tasks:
+      if (this.currentlyHandled < this.options.concurrent) {
+        this.currentlyHandled++;
+        this.tasks.delete(id);
+
+        promises.push(
+          Promise.resolve(promise())
+            .then(value => {
+              this.emit("resolve", value);
+              return value;
+            })
+            .catch(error => {
+              this.emit("reject", error);
+              return error;
+            })
+            .finally(() => {
+              this.emit("dequeue");
+              this.finalize();
+            })
+        );
       }
-
-      this.currentlyHandled++;
-      this.tasks.delete(id);
-
-      promises.push(Promise.resolve(promise()));
     });
 
-    return Promise.all(promises)
-      .then(values => {
-        for (let output of values) this.emit("resolve", output);
-        return values;
-      })
-      .catch(error => {
-        this.emit("reject", error);
-        return error;
-      })
-      .then(output => {
-        this.finalize();
-        return output;
-      });
+    // Note: Promise.all will reject if any of the concurrent promises fails,
+    // regardless if they are finished yet!
+    const output = await Promise.all(promises);
+
+    return this.options.concurrent === 1 ? output[0] : output;
   }
 
   /**
@@ -211,7 +217,7 @@ export default class Queue extends EventEmitter {
     }
 
     // Start the queue if the queue should resolve new tasks automatically and
-    // the queue hasn't been forced to stop:
+    // hasn't been forced to stop:
     if (this.options.start && !this.stopped) {
       this.start();
     }

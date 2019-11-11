@@ -9,7 +9,9 @@ var _events = _interopRequireDefault(require("events"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -107,7 +109,7 @@ class Queue extends _events.default {
 
     _defineProperty(this, "stopped", false);
 
-    this.options = _objectSpread({}, this.options, options);
+    this.options = _objectSpread({}, this.options, {}, options);
     this.options.interval = parseInt(this.options.interval, 10);
     this.options.concurrent = parseInt(this.options.concurrent, 10); // Backward compatibility:
 
@@ -125,7 +127,7 @@ class Queue extends _events.default {
 
 
   start() {
-    if (!this.started) {
+    if (!this.started && !this.isEmpty) {
       this.emit("start");
       this.stopped = false;
       this.started = true;
@@ -157,7 +159,9 @@ class Queue extends _events.default {
 
 
   finalize() {
-    if (--this.currentlyHandled === 0 && this.isEmpty) {
+    this.currentlyHandled -= 1;
+
+    if (this.currentlyHandled === 0 && this.isEmpty) {
       this.emit("end");
       this.stop(); // Finalize doesn't force queue to stop as `Queue.stop()` does. New tasks
       // should therefore be still resolved automatically if `options.start` was
@@ -176,29 +180,29 @@ class Queue extends _events.default {
    */
 
 
-  dequeue() {
+  async dequeue() {
     const promises = [];
     this.tasks.forEach((promise, id) => {
-      // Maximum amount of parallel concurrencies:
-      if (this.currentlyHandled >= this.options.concurrent) {
-        return;
+      // Maximum amount of parallel tasks:
+      if (this.currentlyHandled < this.options.concurrent) {
+        this.currentlyHandled++;
+        this.tasks.delete(id);
+        promises.push(Promise.resolve(promise()).then(value => {
+          this.emit("resolve", value);
+          return value;
+        }).catch(error => {
+          this.emit("reject", error);
+          return error;
+        }).finally(() => {
+          this.emit("dequeue");
+          this.finalize();
+        }));
       }
+    }); // Note: Promise.all will reject if any of the concurrent promises fails,
+    // regardless if they are finished yet!
 
-      this.currentlyHandled++;
-      this.tasks.delete(id);
-      promises.push(Promise.resolve(promise()));
-    });
-    return Promise.all(promises).then(values => {
-      for (let output of values) this.emit("resolve", output);
-
-      return values;
-    }).catch(error => {
-      this.emit("reject", error);
-      return error;
-    }).then(output => {
-      this.finalize();
-      return output;
-    });
+    const output = await Promise.all(promises);
+    return this.options.concurrent === 1 ? output[0] : output;
   }
   /**
    * Adds a promise to the queue.
@@ -219,7 +223,7 @@ class Queue extends _events.default {
     if (typeof tasks !== "function") {
       throw new Error(`You must provide a function, not ${typeof tasks}.`);
     } // Start the queue if the queue should resolve new tasks automatically and
-    // the queue hasn't been forced to stop:
+    // hasn't been forced to stop:
 
 
     if (this.options.start && !this.stopped) {
