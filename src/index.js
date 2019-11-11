@@ -106,7 +106,7 @@ export default class Queue extends EventEmitter {
    * @access  public
    */
   start() {
-    if (!this.started) {
+    if (!this.started && !this.isEmpty) {
       this.emit("start");
 
       this.stopped = false;
