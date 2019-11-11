@@ -164,7 +164,7 @@ export default class Queue extends EventEmitter {
    * @emits   reject
    * @access  public
    */
-  dequeue() {
+  async dequeue() {
     const promises = [];
 
     this.tasks.forEach((promise, id) => {
@@ -177,19 +177,15 @@ export default class Queue extends EventEmitter {
           Promise.resolve(promise())
             .then(value => {
               this.emit("resolve", value);
-
               return value;
             })
             .catch(error => {
               this.emit("reject", error);
-
               return error;
             })
-            .finally(value => {
+            .finally(() => {
               this.emit("dequeue");
               this.finalize();
-
-              return value;
             })
         );
       }
@@ -197,7 +193,9 @@ export default class Queue extends EventEmitter {
 
     // Note: Promise.all will reject if any of the concurrent promises fails,
     // regardless if they are finished yet!
-    return Promise.all(promises);
+    const output = await Promise.all(promises);
+
+    return this.options.concurrent === 1 ? output[0] : output;
   }
 
   /**

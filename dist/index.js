@@ -127,7 +127,7 @@ class Queue extends _events.default {
 
 
   start() {
-    if (!this.started) {
+    if (!this.started && !this.isEmpty) {
       this.emit("start");
       this.stopped = false;
       this.started = true;
@@ -159,7 +159,9 @@ class Queue extends _events.default {
 
 
   finalize() {
-    if (--this.currentlyHandled === 0 && this.isEmpty) {
+    this.currentlyHandled -= 1;
+
+    if (this.currentlyHandled === 0 && this.isEmpty) {
       this.emit("end");
       this.stop(); // Finalize doesn't force queue to stop as `Queue.stop()` does. New tasks
       // should therefore be still resolved automatically if `options.start` was
@@ -178,21 +180,29 @@ class Queue extends _events.default {
    */
 
 
-  dequeue() {
+  async dequeue() {
     const promises = [];
     this.tasks.forEach((promise, id) => {
-      // Maximum amount of parallel concurrencies:
+      // Maximum amount of parallel tasks:
       if (this.currentlyHandled < this.options.concurrent) {
         this.currentlyHandled++;
         this.tasks.delete(id);
-        promises.push(Promise.resolve(promise()).then(value => this.emit("resolve", value)).catch(error => this.emit("reject", error)).finally(() => {
+        promises.push(Promise.resolve(promise()).then(value => {
+          this.emit("resolve", value);
+          return value;
+        }).catch(error => {
+          this.emit("reject", error);
+          return error;
+        }).finally(() => {
           this.emit("dequeue");
           this.finalize();
         }));
       }
-    }); // Note: Promise.all will reject if any of the concurrent promises fails, regardless if they are finished yet!
+    }); // Note: Promise.all will reject if any of the concurrent promises fails,
+    // regardless if they are finished yet!
 
-    return Promise.all(promises);
+    const output = await Promise.all(promises);
+    return this.options.concurrent === 1 ? output[0] : output;
   }
   /**
    * Adds a promise to the queue.
@@ -213,7 +223,7 @@ class Queue extends _events.default {
     if (typeof tasks !== "function") {
       throw new Error(`You must provide a function, not ${typeof tasks}.`);
     } // Start the queue if the queue should resolve new tasks automatically and
-    // the queue hasn't been forced to stop:
+    // hasn't been forced to stop:
 
 
     if (this.options.start && !this.stopped) {
