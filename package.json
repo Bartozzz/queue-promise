@@ -9,6 +9,9 @@
     "promise-chain",
     "promise-queue"
   ],
+  "files": [
+    "/dist"
+  ],
   "engines": {
     "node": ">=8.12.0"
   },
