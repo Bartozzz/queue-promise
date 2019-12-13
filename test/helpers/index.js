@@ -1,4 +1,4 @@
-import Queue from "../../src";
+import Queue from "../../dist";
 
 export const queueFactory = (options = {}) => {
   return new Queue({
