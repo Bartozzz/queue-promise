@@ -54,13 +54,9 @@
     "prettier": "^1.19.1"
   },
   "scripts": {
-    "test": "npm run prepare && npm run test:eslint && npm run test:flow && npm run test:mocha",
     "test:flow": "flow",
     "test:mocha": "mocha --require @babel/register",
     "test:eslint": "eslint --fix src",
-    "clean": "rm -rf dist",
     "build": "babel src -d dist",
-    "watch": "babel src -d dist -w",
-    "prepare": "npm run clean && npm run build"
   }
 }
