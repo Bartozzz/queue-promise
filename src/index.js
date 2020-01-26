@@ -223,7 +223,6 @@ export default class Queue extends EventEmitter {
     if (this.options.start && !this.stopped) {
       this.start();
     }
-
   }
 
   /**
