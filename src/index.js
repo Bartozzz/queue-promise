@@ -162,6 +162,7 @@ export default class Queue extends EventEmitter {
    * @return  {Promise<any>}
    * @emits   resolve
    * @emits   reject
+   * @emits   dequeue
    * @access  public
    */
   async dequeue() {

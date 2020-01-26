@@ -94,11 +94,12 @@ const [userA, userB] = await queue.dequeue();
 
 #### **public** `.on(event, callback)`
 
-Sets a `callback` for an `event`. You can set callback for those events: `start`, `stop`, `resolve`, `reject`, `end`.
+Sets a `callback` for an `event`. You can set callback for those events: `start`, `stop`, `resolve`, `reject`, `dequeue`, `end`.
 
 **Example:**
 
 ```javascript
+queue.on("dequeue", () => …);
 queue.on("resolve", data => …);
 queue.on("reject", error => …);
 queue.on("start", () => …);
