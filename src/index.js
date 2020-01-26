@@ -162,6 +162,7 @@ export default class Queue extends EventEmitter {
    * @return  {Promise<any>}
    * @emits   resolve
    * @emits   reject
+   * @emits   dequeue
    * @access  public
    */
   async dequeue() {
@@ -216,13 +217,13 @@ export default class Queue extends EventEmitter {
       throw new Error(`You must provide a function, not ${typeof tasks}.`);
     }
 
+    this.tasks.set(this.uniqueId++, tasks);
+
     // Start the queue if the queue should resolve new tasks automatically and
     // hasn't been forced to stop:
     if (this.options.start && !this.stopped) {
       this.start();
     }
-
-    this.tasks.set(this.uniqueId++, tasks);
   }
 
   /**
