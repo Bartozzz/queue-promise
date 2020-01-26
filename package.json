@@ -51,14 +51,15 @@
     "eslint-plugin-standard": "^4.0.1",
     "flow-bin": "^0.114.0",
     "mocha": "^7.0.1",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "rimraf": "^3.0.0"
   },
   "scripts": {
     "test": "npm run prepare && npm run test:eslint && npm run test:flow && npm run test:mocha",
     "test:flow": "flow",
     "test:mocha": "mocha --require @babel/register",
     "test:eslint": "eslint --fix src",
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "build": "babel src -d dist",
     "watch": "babel src -d dist -w",
     "prepare": "npm run clean && npm run build"
