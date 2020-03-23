@@ -51,7 +51,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "flow-bin": "^0.119.1",
     "mocha": "^7.0.1",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.2",
     "rimraf": "^3.0.0"
   },
   "scripts": {
