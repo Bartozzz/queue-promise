@@ -1,9 +1,10 @@
 <div align="center">
   <h1>queue-promise</h1>
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/Bartozzz/queue-promise.svg)](https://greenkeeper.io/)
-[![Build Status](https://img.shields.io/travis/Bartozzz/queue-promise.svg)](https://travis-ci.org/Bartozzz/queue-promise/)
+[![Known Vulnerabilities](https://snyk.io/test/github/Bartozzz/queue-promise/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Bartozzz/queue-promise?targetFile=package.json)
+[![Default CI/CD](https://github.com/Bartozzz/queue-promise/workflows/Default%20CI/CD/badge.svg)](https://github.com/Bartozzz/queue-promise/actions)
 [![npm version](https://img.shields.io/npm/v/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
+[![npm dependency Status](https://david-dm.org/Bartozzz/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
 [![npm downloads](https://img.shields.io/npm/dt/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
 <br>
 
