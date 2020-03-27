@@ -23,11 +23,8 @@ $ npm install queue-promise
 import Queue from "queue-promise";
 
 const queue = new Queue({
-  // How many tasks should be executed in parallel (defaults to `5`):
   concurrent: 1,
-  // How often should new tasks be executed (in ms – defaults to `500`):
   interval: 2000,
-  // If should resolve new tasks automatically when added (defaults to `true`):
   start: true
 });
 
@@ -54,7 +51,7 @@ Create a new `Queue` instance.
 | :----------- | :------ | :-------------------------------------------------------------------------- |
 | `concurrent` | `5`     | How many tasks should be executed in parallel                               |
 | `interval`   | `500`   | How often should new tasks be executed (in ms)                              |
-| `start`      | `true`  | Whether it should automatically resolve new tasks as soon as they are added |
+| `start`      | `true`  | Whether it should automatically execute new tasks as soon as they are added |
 
 #### **public** `.enqueue(tasks)`/`.add(tasks)`
 
@@ -67,28 +64,33 @@ async function getRepos(user) {
   return await github.getRepos(user);
 }
 
-queue.enqueue(getRepos("userA"));
-queue.enqueue(getRepos("userB"));
+queue.enqueue(() => {
+  return getRepos("userA");
+});
+
+queue.enqueue(async () => {
+  await getRepos("userB");
+});
 
 // …equivalent to:
-queue.enqueue([getRepos("userA"), getRepos("userB")]);
+queue.enqueue([() => getRepos("userA"), () => getRepos("userB")]);
 ```
 
 #### **public** `.dequeue()`
 
-Manually resolves _n_ concurrent (based od `options.concurrent`) promises from the queue. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Is called automatically if `options.start` is set to `true`. Emits `resolve` and `reject` events.
+Executes _n_ concurrent (based od `options.concurrent`) promises from the queue. Uses global [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Is called automatically if `options.start` is set to `true`. Emits `resolve` and `reject` events.
 
 **Example:**
 
 ```javascript
-queue.enqueue(getRepos("userA"));
-queue.enqueue(getRepos("userB"));
+queue.enqueue(() => getRepos("userA"));
+queue.enqueue(() => getRepos("userB"));
 
-// If "concurrent" is set to 1, only one promise is resolved on dequeue:
+// If "concurrent" is set to 1, only one promise is executed on dequeue:
 const userA = await queue.dequeue();
 const userB = await queue.dequeue();
 
-// If "concurrent" is set to 2, two promises are resolved concurrently:
+// If "concurrent" is set to 2, two promises are executed concurrently:
 const [userA, userB] = await queue.dequeue();
 ```
 
@@ -107,15 +109,19 @@ queue.on("stop", () => …);
 queue.on("end", () => …);
 ```
 
+**Note:**
+
+`dequeue`, `resolve` and `reject` events are emitted per task. This means that even if `concurrent` is set to `2`, `2` events will be emitted.
+
 #### **public** `.start()`
 
 Starts the queue – it will automatically dequeue tasks periodically. Emits `start` event.
 
 ```javascript
-queue.enqueue(getRepos("userA"));
-queue.enqueue(getRepos("userB"));
-queue.enqueue(getRepos("userC"));
-queue.enqueue(getRepos("userD"));
+queue.enqueue(() => getRepos("userA"));
+queue.enqueue(() => getRepos("userB"));
+queue.enqueue(() => getRepos("userC"));
+queue.enqueue(() => getRepos("userD"));
 queue.start();
 
 // No need to call `dequeue` – you can just listen for events:
@@ -125,7 +131,7 @@ queue.on("reject", error => …);
 
 #### **public** `.stop()`
 
-Forces the queue to stop. New tasks will not be resolved automatically even if `options.start` was set to `true`. Emits `stop` event.
+Forces the queue to stop. New tasks will not be executed automatically even if `options.start` was set to `true`. Emits `stop` event.
 
 #### **public** `.clear()`
 
@@ -133,11 +139,11 @@ Removes all tasks from the queue.
 
 #### **public** `.started`
 
-Whether the queue has been started or not.
+Whether the queue is running.
 
 #### **public** `.stopped`
 
-Whether the queue has been forced to stop.
+Whether the queue has been forced to stop by calling `Queue.stop`.
 
 #### **public** `.isEmpty`
 
