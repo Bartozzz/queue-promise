@@ -61,7 +61,7 @@ export default class Queue extends EventEmitter {
   options = {
     concurrent: 5,
     interval: 500,
-    start: true
+    start: true,
   };
 
   /**
@@ -107,8 +107,6 @@ export default class Queue extends EventEmitter {
    */
   start() {
     if (!this.started && !this.isEmpty) {
-      this.emit("start");
-
       this.stopped = false;
       this.started = true;
 
@@ -116,6 +114,8 @@ export default class Queue extends EventEmitter {
         this.dequeue.bind(this),
         this.options.interval
       );
+
+      this.emit("start");
     }
   }
 
@@ -127,12 +127,12 @@ export default class Queue extends EventEmitter {
    * @access  public
    */
   stop() {
-    this.emit("stop");
-
     this.stopped = true;
     this.started = false;
 
     clearInterval(this.intervalId);
+
+    this.emit("stop");
   }
 
   /**
@@ -176,11 +176,11 @@ export default class Queue extends EventEmitter {
 
         promises.push(
           Promise.resolve(promise())
-            .then(value => {
+            .then((value) => {
               this.emit("resolve", value);
               return value;
             })
-            .catch(error => {
+            .catch((error) => {
               this.emit("reject", error);
               return error;
             })
@@ -209,7 +209,7 @@ export default class Queue extends EventEmitter {
    */
   enqueue(tasks: Function | Array<Function>) {
     if (Array.isArray(tasks)) {
-      tasks.map(task => this.enqueue(task));
+      tasks.map((task) => this.enqueue(task));
       return;
     }
 
