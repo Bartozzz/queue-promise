@@ -2,9 +2,9 @@
 import EventEmitter from "events";
 
 /**
- * A small and simple library for promise-based queues. It will resolve enqueued
+ * A small and simple library for promise-based queues. It will execute enqueued
  * functions concurrently at a specified speed. When a task is being resolved or
- * rejected, an event will be emitted.
+ * rejected, an event is emitted.
  *
  * @example
  *    const queue = new Queue({

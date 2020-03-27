@@ -7,7 +7,7 @@
 [![npm downloads](https://img.shields.io/npm/dt/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
 <br>
 
-`queue-promise` is a small, dependency-free library for promise-based queues. It will resolve enqueued tasks concurrently at a given speed. When a task is being resolved or rejected, an event will be emitted.
+`queue-promise` is a small, dependency-free library for promise-based queues. It will execute enqueued tasks concurrently at a given speed. When a task is being resolved or rejected, an event is emitted.
 
 </div>
 
