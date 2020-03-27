@@ -1,0 +1,33 @@
+name: Default CI/CD
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup environment
+        uses: actions/setup-node@v1
+
+      - name: Cache node modules
+        uses: actions/cache@v1
+        env:
+          cache-name: v1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install node modules
+        run: npm install
+
+      - name: Test
+        run: npm run test

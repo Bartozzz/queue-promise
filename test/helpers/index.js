@@ -3,9 +3,9 @@ import Queue from "../../dist";
 export const queueFactory = (options = {}) => {
   return new Queue({
     concurrent: 1,
-    interval: 150,
+    interval: 10,
     start: false,
-    ...options
+    ...options,
   });
 };
 
