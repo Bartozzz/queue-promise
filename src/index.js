@@ -40,10 +40,16 @@ export default class Queue extends EventEmitter {
   uniqueId = 0;
 
   /**
-   * @type    {IntervalID}
+   * @type    {number}
    * @access  private
    */
-  intervalId: IntervalID;
+  lastRan: number;
+
+  /**
+   * @type    {TimeoutID}
+   * @access  private
+   */
+  timeoutId: TimeoutID;
 
   /**
    * @type    {number}  Amount of tasks currently handled by the queue
@@ -110,10 +116,11 @@ export default class Queue extends EventEmitter {
       this.stopped = false;
       this.started = true;
 
-      this.intervalId = setInterval(
-        this.dequeue.bind(this),
-        this.options.interval
-      );
+      (async () => {
+        while (!this.isEmpty && !this.stopped) {
+          await this.execute();
+        }
+      })();
 
       this.emit("start");
     }
@@ -131,7 +138,7 @@ export default class Queue extends EventEmitter {
     this.stopped = true;
     this.started = false;
 
-    clearInterval(this.intervalId);
+    clearTimeout(this.timeoutId);
 
     this.emit("stop");
   }
@@ -165,9 +172,9 @@ export default class Queue extends EventEmitter {
    * @emits   resolve
    * @emits   reject
    * @emits   dequeue
-   * @access  public
+   * @access  private
    */
-  async dequeue() {
+  async execute() {
     const promises = [];
 
     this.tasks.forEach((promise, id) => {
@@ -201,6 +208,32 @@ export default class Queue extends EventEmitter {
     const output = await Promise.all(promises);
 
     return this.options.concurrent === 1 ? output[0] : output;
+  }
+
+  /**
+   * Executes _n_ concurrent (based od `options.concurrent`) promises from the
+   * queue.
+   *
+   * @return  {Promise<any>}
+   * @emits   resolve
+   * @emits   reject
+   * @emits   dequeue
+   * @access  public
+   */
+  dequeue() {
+    const { interval } = this.options;
+
+    return new Promise<*>((resolve, reject) => {
+      if (!this.lastRan) {
+        this.lastRan = -Date.now() + interval;
+      }
+
+      clearTimeout(this.timeoutId);
+      this.timeoutId = setTimeout(() => {
+        this.lastRan = Date.now();
+        this.execute().then(resolve);
+      }, interval - (Date.now() - this.lastRan));
+    });
   }
 
   /**

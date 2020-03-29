@@ -37,10 +37,10 @@ queue.on("end", () => /* … */);
 queue.on("resolve", data => console.log(data));
 queue.on("reject", error => console.error(error));
 
-queue.enqueue(asyncTaskA); // resolved/rejected after 0s
-queue.enqueue(asyncTaskB); // resolved/rejected after 2s
-queue.enqueue(asyncTaskC); // resolved/rejected after 4s
-queue.enqueue(asyncTaskD); // resolved/rejected after 6s
+queue.enqueue(asyncTaskA); // resolved/rejected after 0ms
+queue.enqueue(asyncTaskB); // resolved/rejected after 2000ms
+queue.enqueue(asyncTaskC); // resolved/rejected after 4000ms
+queue.enqueue(asyncTaskD); // resolved/rejected after 6000ms
 ```
 
 ## API
@@ -95,6 +95,10 @@ const userB = await queue.dequeue();
 // If "concurrent" is set to 2, two promises are executed concurrently:
 const [userA, userB] = await queue.dequeue();
 ```
+
+**Note:**
+
+`.dequeue()` function throttles (is executed at most once per every `options.interval` milliseconds).
 
 #### **public** `.on(event, callback)`
 

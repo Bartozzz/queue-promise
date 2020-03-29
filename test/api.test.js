@@ -1,11 +1,11 @@
 import chai from "chai";
 import { queueFactory, resolve, reject } from "./helpers";
 
-describe("queue-promise (API tests)", function () {
+describe("queue-promise (API tests)", () => {
   const expect = chai.expect;
 
-  describe("start()", function () {
-    it("should start only if the queue is not empty", function (done) {
+  describe("start()", () => {
+    it("should start only if the queue is not empty", (done) => {
       const queue = queueFactory();
 
       queue.start();
@@ -16,7 +16,7 @@ describe("queue-promise (API tests)", function () {
       queue.start();
     });
 
-    it("should automatically start the queue if `start = true`", function (done) {
+    it("should automatically start the queue if `start = true`", (done) => {
       let queue = queueFactory({ start: true });
 
       queue.enqueue(resolve);
@@ -24,8 +24,8 @@ describe("queue-promise (API tests)", function () {
     });
   });
 
-  describe("stop()", function () {
-    it("should stop the queue even if all tasks are not completed", function (done) {
+  describe("stop()", () => {
+    it("should stop the queue even if all tasks are not completed", (done) => {
       const queue = queueFactory({ concurrent: 1, interval: 1000 });
 
       queue.enqueue(resolve);
@@ -44,7 +44,7 @@ describe("queue-promise (API tests)", function () {
       queue.start();
     });
 
-    it("should prevent the queue from autostarting when stopped manually", function (done) {
+    it("should prevent the queue from autostarting when stopped manually", (done) => {
       const queue = queueFactory({ start: true });
 
       queue.on("start", () => {
@@ -69,8 +69,8 @@ describe("queue-promise (API tests)", function () {
     });
   });
 
-  describe("dequeue()", function () {
-    it("should resolve enqueued tasks", async function () {
+  describe("execute()", () => {
+    it("should resolve enqueued tasks", async () => {
       const queue = queueFactory();
 
       queue.enqueue(reject);
@@ -87,7 +87,7 @@ describe("queue-promise (API tests)", function () {
       expect(queue.tasks.size).to.equal(0);
     });
 
-    it("should resolve multiple enqueued tasks (2 concurrent – 4 tasks)", async function () {
+    it("should resolve multiple enqueued tasks (2 concurrent – 4 tasks)", async () => {
       const queue = queueFactory({
         concurrent: 2,
       });
@@ -108,7 +108,7 @@ describe("queue-promise (API tests)", function () {
       expect(queue.tasks.size).to.equal(0);
     });
 
-    it("should resolve multiple enqueued tasks (2 concurrent – 3 tasks)", async function () {
+    it("should resolve multiple enqueued tasks (2 concurrent – 3 tasks)", async () => {
       const queue = queueFactory({
         concurrent: 2,
       });
@@ -129,8 +129,8 @@ describe("queue-promise (API tests)", function () {
     });
   });
 
-  describe("enqueue(asyncTask)", function () {
-    it("should add a new task if valid", function () {
+  describe("enqueue(asyncTask)", () => {
+    it("should add a new task if valid", () => {
       const queue = queueFactory();
 
       queue.enqueue(reject);
@@ -139,7 +139,7 @@ describe("queue-promise (API tests)", function () {
       expect(queue.tasks.size).to.equal(2);
     });
 
-    it("should add an array of tasks if valid", function () {
+    it("should add an array of tasks if valid", () => {
       const queue = queueFactory();
 
       queue.enqueue([resolve, reject]);
@@ -148,24 +148,40 @@ describe("queue-promise (API tests)", function () {
       expect(queue.tasks.size).to.equal(4);
     });
 
-    it("should reject a new task if not valid", function () {
+    it("should reject a new task if not valid", () => {
       const queue = queueFactory();
 
       try {
         expect(queue.enqueue(true)).to.throw();
       } catch (err) {
         expect(err).to.be.an.instanceof(Error);
-        expect(err.message).to.equal(
-          "You must provide a function, not boolean."
-        );
       }
 
       queue.clear();
     });
   });
 
-  describe("clear()", function () {
-    it("should remove enqueued tasks", function () {
+  describe("dequeue()", () => {
+    it("should be throttling between successive executions", async () => {
+      const start = Date.now();
+      const interval = 100;
+      const queue = queueFactory({ interval });
+
+      queue.enqueue([resolve, resolve, resolve]);
+
+      const task1 = await queue.dequeue();
+      expect(Date.now() - start).to.be.closeTo(interval * 0, interval / 5);
+
+      const task2 = await queue.dequeue();
+      expect(Date.now() - start).to.be.closeTo(interval * 1, interval / 5);
+
+      const task3 = await queue.dequeue();
+      expect(Date.now() - start).to.be.closeTo(interval * 2, interval / 5);
+    });
+  });
+
+  describe("clear()", () => {
+    it("should remove enqueued tasks", () => {
       const queue = queueFactory();
 
       queue.enqueue(reject);
@@ -181,7 +197,7 @@ describe("queue-promise (API tests)", function () {
     });
   });
 
-  describe("isEmpty", function () {
+  describe("isEmpty", () => {
     it("should return 'true' when queue is empty", () => {
       const queue = queueFactory();
 
@@ -302,9 +318,9 @@ describe("queue-promise (API tests)", function () {
         queue.start();
       });
 
-      it("should emit 'dequeue' event on concurrent eval", function (done) {
+      it("should emit 'dequeue' event on concurrent eval", (done) => {
         let count = 2;
-        let queue = queueFactory({ concurrency: 2 });
+        let queue = queueFactory({ concurrent: 2 });
 
         queue.enqueue(reject);
         queue.enqueue(resolve);
@@ -338,9 +354,9 @@ describe("queue-promise (API tests)", function () {
         queue.start();
       });
 
-      it("should emit 'resolve' event on concurrent eval", function (done) {
+      it("should emit 'resolve' event on concurrent eval", (done) => {
         let count = 2;
-        let queue = queueFactory({ concurrency: 2 });
+        let queue = queueFactory({ concurrent: 2 });
 
         queue.enqueue(resolve);
         queue.enqueue(resolve);
@@ -375,9 +391,9 @@ describe("queue-promise (API tests)", function () {
         queue.start();
       });
 
-      it("should emit 'reject' event on concurrent eval", function (done) {
+      it("should emit 'reject' event on concurrent eval", (done) => {
         let count = 2;
-        let queue = queueFactory({ concurrency: 2 });
+        let queue = queueFactory({ concurrent: 2 });
 
         queue.enqueue(reject);
         queue.enqueue(reject);
