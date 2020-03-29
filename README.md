@@ -1,8 +1,9 @@
 <div align="center">
   <h1>queue-promise</h1>
 
-[![Known Vulnerabilities](https://snyk.io/test/github/Bartozzz/queue-promise/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Bartozzz/queue-promise?targetFile=package.json)
 [![Default CI/CD](https://github.com/Bartozzz/queue-promise/workflows/Default%20CI/CD/badge.svg)](https://github.com/Bartozzz/queue-promise/actions)
+[![Known Vulnerabilities](https://snyk.io/test/github/Bartozzz/queue-promise/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Bartozzz/queue-promise?targetFile=package.json)
+[![npm package size](https://img.badgesize.io/Bartozzz/queue-promise/master/dist/index.js?compression=gzip)](https://www.npmjs.com/package/queue-promise)
 [![npm version](https://img.shields.io/npm/v/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
 [![npm dependency Status](https://david-dm.org/Bartozzz/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)
 [![npm downloads](https://img.shields.io/npm/dt/queue-promise.svg)](https://www.npmjs.com/package/queue-promise)

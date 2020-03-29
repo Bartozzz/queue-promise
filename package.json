@@ -19,6 +19,7 @@
   "author": "Łaniewski Bartosz <bartosz@laniewski.me> (https://laniewski.me/)",
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist",
   "repository": {
     "type": "git",
     "url": "https://github.com/Bartozzz/queue-promise.git"
@@ -30,16 +31,19 @@
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.0",
+    "@babel/node": "^7.8.7",
     "@babel/plugin-proposal-async-generator-functions": "^7.8.3",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-flow": "^7.9.0",
     "@babel/register": "^7.9.0",
+    "@types/node": "13.9.5",
     "babel-eslint": "^10.1.0",
     "babel-plugin-add-module-exports": "^1.0.2",
     "babel-preset-minify": "0.5.1",
     "chai": "^4.2.0",
+    "dtslint": "^3.4.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-config-standard": "^14.1.1",
@@ -50,18 +54,26 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "flow-bin": "^0.121.0",
+    "fs-extra": "^9.0.0",
+    "glob": "^7.1.6",
     "mocha": "^7.1.1",
     "prettier": "^2.0.2",
     "rimraf": "^3.0.2"
   },
   "scripts": {
-    "test": "npm run prepare && npm run test:eslint && npm run test:flow && npm run test:mocha",
+    "pretest": "npm run prepare",
+    "test": "npm run test:eslint && npm run test:flow && npm run test:typescript && npm run test:mocha",
     "test:flow": "flow",
+    "test:typescript": "npx dtslint types",
     "test:mocha": "mocha --require @babel/register",
-    "test:eslint": "eslint --fix src",
+    "test:eslint": "eslint src",
+    "defs:flow": "npx babel-node ./.bin/definitions-flow.js",
+    "defs:typescript": "npx babel-node ./.bin/definitions-typescript.js",
     "clean": "rimraf dist",
+    "prebuild": "npm run clean",
     "build": "babel src -d dist",
+    "postbuild": "npm run defs:flow && npm run defs:typescript",
     "watch": "babel src -d dist -w",
-    "prepare": "npm run clean && npm run build"
+    "prepare": "npm run build"
   }
 }
