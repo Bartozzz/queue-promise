@@ -116,13 +116,13 @@ export default class Queue extends EventEmitter {
       this.stopped = false;
       this.started = true;
 
-      this.emit("start");
-
       (async () => {
         while (!this.isEmpty && !this.stopped) {
           await this.execute();
         }
       })();
+
+      this.emit("start");
     }
   }
 
