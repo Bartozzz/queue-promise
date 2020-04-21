@@ -1,7 +1,3 @@
 {
-  "sandboxes": [
-    "vanilla",
-    "/.codesandbox/sandbox/manual",
-    "/.codesandbox/sandbox/automatic"
-  ]
+  "sandboxes": ["new"]
 }
