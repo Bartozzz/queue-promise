@@ -1,0 +1,13 @@
+{
+  "name": "queue-promise-sandbox-manual",
+  "main": "index.js",
+  "private": true,
+  "version": "1.0.0",
+  "description": "queue-promise sandbox started for manual mode",
+  "dependencies": {
+    "queue-promise": "latest"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
