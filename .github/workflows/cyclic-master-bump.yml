@@ -23,7 +23,6 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v2.8.0
         with:
-          base: development
           token: ${{ secrets.REPO_SCOPED_TOKEN }}
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
