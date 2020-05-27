@@ -5,7 +5,7 @@ name: Cyclic master branch bump
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 0 1 * *"
 
 jobs:
   create:
