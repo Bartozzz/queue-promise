@@ -179,19 +179,18 @@ $ npm run <command>
 
 #### List of commands
 
-| Command           | Description                                              |
-| :---------------- | :------------------------------------------------------- |
-| `test`            | Run all `test:*` commands described below.               |
-| `test:flow`       | Test Flow types.                                         |
-| `test:typescript` | Test TypeScript types.                                   |
-| `test:unit`       | Run unit tests.                                          |
-| `test:lint`       | Run linter tests.                                        |
-| `defs:flow`       | Build Flow type definitions.                             |
-| `defs:typescript` | Build TypeScript type definitions.                       |
-| `clean`           | Clean `dist` directory.                                  |
-| `build`           | Build package and generate type definitions.             |
-| `watch`           | Build package in watch mode.                             |
-| `release`         | Bump package version and generate a `CHANGELOG.md` file. |
+| Command           | Description                                  |
+| :---------------- | :------------------------------------------- |
+| `test`            | Run all `test:*` commands described below.   |
+| `test:flow`       | Test Flow types.                             |
+| `test:typescript` | Test TypeScript types.                       |
+| `test:unit`       | Run unit tests.                              |
+| `test:lint`       | Run linter tests.                            |
+| `defs:flow`       | Build Flow type definitions.                 |
+| `defs:typescript` | Build TypeScript type definitions.           |
+| `clean`           | Clean `dist` directory.                      |
+| `build`           | Build package and generate type definitions. |
+| `watch`           | Build package in watch mode.                 |
 
 ### License
 
