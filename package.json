@@ -61,7 +61,8 @@
     "husky": "^4.2.5",
     "mocha": "^7.1.1",
     "prettier": "^2.0.2",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "standard-version": "8.0.0"
   },
   "scripts": {
     "pretest": "npm run prepare",
@@ -77,7 +78,9 @@
     "build": "npx babel src -d dist",
     "postbuild": "npm run defs:flow && npm run defs:typescript",
     "watch": "npx babel src -d dist -w",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "prerelease": "npm run build",
+    "release": "git add dist/* && standard-version -a"
   },
   "husky": {
     "hooks": {
