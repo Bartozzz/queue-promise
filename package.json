@@ -78,7 +78,9 @@
     "build": "npx babel src -d dist",
     "postbuild": "npm run defs:flow && npm run defs:typescript",
     "watch": "npx babel src -d dist -w",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "prerelease": "npm run build",
+    "release": "git add dist/* && standard-version -a"
   },
   "husky": {
     "hooks": {
