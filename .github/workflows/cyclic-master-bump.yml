@@ -11,6 +11,15 @@ jobs:
   create:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Reset promotion branch
+        run: |
+          git fetch origin development:development
+          git reset --hard development
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v2.8.0
         with:
