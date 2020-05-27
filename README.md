@@ -160,3 +160,47 @@ Whether the queue is empty, i.e. there's no tasks.
 ```bash
 $ npm test
 ```
+
+## Contributing
+
+### Development
+
+We have prepared multiple commands to help you develop `queue-promise` on your own. You will need a local copy of [Node.js](https://nodejs.org/en/) installed on your machine. Then, install project dependencies using the following command:
+
+```bash
+$ npm install
+```
+
+#### Usage
+
+```bash
+$ npm run <command>
+```
+
+#### List of commands
+
+| Command           | Description                                              |
+| :---------------- | :------------------------------------------------------- |
+| `test`            | Run all `test:*` commands described below.               |
+| `test:flow`       | Test Flow types.                                         |
+| `test:typescript` | Test TypeScript types.                                   |
+| `test:unit`       | Run unit tests.                                          |
+| `test:lint`       | Run linter tests.                                        |
+| `defs:flow`       | Build Flow type definitions.                             |
+| `defs:typescript` | Build TypeScript type definitions.                       |
+| `clean`           | Clean `dist` directory.                                  |
+| `build`           | Build package and generate type definitions.             |
+| `watch`           | Build package in watch mode.                             |
+| `release`         | Bump package version and generate a `CHANGELOG.md` file. |
+
+### License
+
+`queue-promise` was created and developed by [Bartosz Łaniewski](https://github.com/Bartozzz). The full list of contributors can be found [here](https://github.com/Bartozzz/queue-promise/graphs/contributors). The package is [MIT licensed](https://github.com/Bartozzz/queue-promise/blob/master/LICENSE).
+
+### Bug reporting
+
+[![Github Open Issues](https://img.shields.io/github/issues-raw/Bartozzz/queue-promise.svg)](https://github.com/Bartozzz/queue-promise/issues)
+[![Github Closed Issues](https://img.shields.io/github/issues-closed-raw/Bartozzz/queue-promise.svg)](https://github.com/Bartozzz/queue-promise/issues?q=is%3Aissue+is%3Aclosed)
+[![Github Pull Requests](https://img.shields.io/github/issues-pr-raw/Bartozzz/queue-promise.svg)](https://github.com/Bartozzz/queue-promise/pulls)
+
+**We want contributing to `queue-promise` to be fun, enjoyable, and educational for anyone, and everyone.** Changes and improvements are more than welcome! Feel free to fork and open a pull request. We use [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages. If you have found any issues, please [report them here](https://github.com/Bartozzz/queue-promise/new) - they are being tracked on [GitHub Issues](https://github.com/Bartozzz/queue-promise/issues).
