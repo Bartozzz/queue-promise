@@ -38,6 +38,8 @@
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-flow": "^7.9.0",
     "@babel/register": "^7.9.0",
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
     "@types/node": "14.0.5",
     "babel-eslint": "^10.1.0",
     "babel-plugin-add-module-exports": "^1.0.2",
@@ -76,9 +78,7 @@
     "build": "npx babel src -d dist",
     "postbuild": "npm run defs:flow && npm run defs:typescript",
     "watch": "npx babel src -d dist -w",
-    "prepare": "npm run build",
-    "prerelease": "npm run build",
-    "release": "git add dist/* && standard-version -a"
+    "prepare": "npm run build"
   },
   "husky": {
     "hooks": {
