@@ -1,0 +1,19 @@
+name: Cyclic master branch merge
+
+on:
+  pull_request:
+    types: [opened, labeled]
+    branches:
+      - master
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge cyclic master branch bump
+        uses: devmasx/merge-branch@v1.1.0
+        with:
+          label_name: "cyclic-master"
+          target_branch: "master"
+        env:
+          GITHUB_TOKEN: ${{secrets.REPO_SCOPED_TOKEN}}

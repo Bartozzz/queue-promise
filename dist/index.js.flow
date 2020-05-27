@@ -254,7 +254,8 @@ export default class Queue extends EventEmitter {
       throw new Error(`You must provide a function, not ${typeof tasks}.`);
     }
 
-    this.tasks.set(this.uniqueId++, tasks);
+    this.uniqueId = (this.uniqueId + 1) % Number.MAX_SAFE_INTEGER;
+    this.tasks.set(this.uniqueId, tasks);
 
     // Start the queue if the queue should resolve new tasks automatically and
     // hasn't been forced to stop:
