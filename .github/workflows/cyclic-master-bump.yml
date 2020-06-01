@@ -5,7 +5,7 @@ name: Cyclic master branch bump
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 0 1 * *"
 
 jobs:
   create:
@@ -27,6 +27,7 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           labels: cyclic-master, automated-pr
+          branch-suffix: timestamp
           assignees: Bartozzz
           reviewers: Bartozzz
           title: "chore(automatic-release): cyclic master branch bump"
