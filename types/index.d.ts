@@ -15,6 +15,7 @@ declare module "queue-promise" {
     readonly started: boolean;
     readonly stopped: boolean;
     readonly isEmpty: boolean;
+    readonly shouldRun: boolean;
 
     constructor(options?: QueueOptions);
 

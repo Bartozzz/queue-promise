@@ -20,6 +20,11 @@ queue.isEmpty;
 // $ExpectError
 queue.isEmpty = false;
 
+// $ExpectType boolean
+queue.shouldRun;
+// $ExpectError
+queue.shouldRun = false;
+
 // $ExpectType void
 queue.start();
 

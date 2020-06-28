@@ -119,7 +119,7 @@ export default class Queue extends EventEmitter {
       this.emit("start");
 
       (async () => {
-        while (!this.isEmpty && !this.stopped) {
+        while (this.shouldRun) {
           await this.dequeue();
         }
       })();
@@ -290,5 +290,15 @@ export default class Queue extends EventEmitter {
    */
   get isEmpty() {
     return this.tasks.size === 0;
+  }
+
+  /**
+   * Checks whether the queue is not empty and not stopped.
+   *
+   * @type    {boolean}
+   * @access  public
+   */
+  get shouldRun() {
+    return !this.isEmpty && !this.stopped;
   }
 }
