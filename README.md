@@ -180,7 +180,7 @@ Whether the queue is empty, i.e. there's no tasks.
 
 #### **public** `.shouldRun`
 
-Whether the queue is empty, i.e. there's no tasks.
+Checks whether the queue is not empty and not stopped.
 
 ## Tests
 
