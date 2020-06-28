@@ -214,6 +214,32 @@ describe("queue-promise (API tests)", () => {
     });
   });
 
+  describe("shouldRun", () => {
+    it("should return 'false' when queue is empty", () => {
+      const queue = queueFactory();
+
+      expect(queue.shouldRun).to.be.false;
+    });
+
+    it("should return 'false' when queue is stopped", () => {
+      const queue = queueFactory();
+      queue.stop();
+      queue.enqueue(reject);
+      queue.enqueue(resolve);
+
+      expect(queue.shouldRun).to.be.false;
+    });
+
+    it("should return 'true' when queue is not empty and not stopped", () => {
+      const queue = queueFactory();
+
+      queue.enqueue(resolve);
+      queue.enqueue(reject);
+
+      expect(queue.shouldRun).to.be.true;
+    });
+  });
+
   describe("on(event, callback)", () => {
     describe("Event: start", () => {
       it("should emit 'start' event when the queue hasn't started yet and isn't empty", (done) => {
