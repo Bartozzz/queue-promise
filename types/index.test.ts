@@ -5,20 +5,20 @@ const reject = (value: any) => new Promise((resolve, _) => resolve(value));
 
 const queue = new Queue();
 
-// $ExpectType boolean
-queue.started;
+// $ExpectType State
+queue.state;
 // $ExpectError
-queue.started = false;
-
-// $ExpectType boolean
-queue.stopped;
-// $ExpectError
-queue.stopped = false;
+queue.state = false;
 
 // $ExpectType boolean
 queue.isEmpty;
 // $ExpectError
 queue.isEmpty = false;
+
+// $ExpectType boolean
+queue.shouldRun;
+// $ExpectError
+queue.shouldRun = false;
 
 // $ExpectType void
 queue.start();

@@ -9,7 +9,7 @@ describe("queue-promise (API tests)", () => {
       const queue = queueFactory();
 
       queue.start();
-      expect(queue.started).to.be.false;
+      expect(queue.state).to.equal(0); // IDLE
 
       queue.enqueue(resolve);
       queue.on("end", done);
@@ -52,15 +52,13 @@ describe("queue-promise (API tests)", () => {
       });
 
       queue.on("stop", () => {
-        expect(queue.started).to.be.false;
-        expect(queue.stopped).to.be.true;
+        expect(queue.state).to.equal(2); // STOPPED
 
         // If not stopped manually using `stop()`, the queue would automatically
         // resolve new enqueued task:
         queue.enqueue(resolve);
 
-        expect(queue.started).to.be.false;
-        expect(queue.stopped).to.be.true;
+        expect(queue.state).to.equal(2); // STOPPED
 
         done();
       });
@@ -211,6 +209,32 @@ describe("queue-promise (API tests)", () => {
       queue.enqueue(reject);
 
       expect(queue.isEmpty).to.be.false;
+    });
+  });
+
+  describe("shouldRun", () => {
+    it("should return 'false' when queue is empty", () => {
+      const queue = queueFactory();
+
+      expect(queue.shouldRun).to.be.false;
+    });
+
+    it("should return 'false' when queue is stopped", () => {
+      const queue = queueFactory();
+      queue.stop();
+      queue.enqueue(reject);
+      queue.enqueue(resolve);
+
+      expect(queue.shouldRun).to.be.false;
+    });
+
+    it("should return 'true' when queue is not empty and not stopped", () => {
+      const queue = queueFactory();
+
+      queue.enqueue(resolve);
+      queue.enqueue(reject);
+
+      expect(queue.shouldRun).to.be.true;
     });
   });
 

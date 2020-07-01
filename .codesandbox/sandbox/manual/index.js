@@ -44,7 +44,7 @@ queue.enqueue(failureTask);
 queue.enqueue(failureTask);
 
 (async function () {
-  while (!queue.isEmpty && !queue.stopped) {
+  while (queue.shouldRun) {
     const result = await queue.dequeue();
 
     console.debug("Dequeue result", result);

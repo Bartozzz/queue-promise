@@ -21,13 +21,14 @@ $ npm install queue-promise
 
 ## Usage
 
+### With automatic start
+
 ```javascript
 import Queue from "queue-promise";
 
 const queue = new Queue({
   concurrent: 1,
-  interval: 2000,
-  start: true
+  interval: 2000
 });
 
 queue.on("start", () => /* … */);
@@ -40,7 +41,29 @@ queue.on("reject", error => console.error(error));
 queue.enqueue(asyncTaskA); // resolved/rejected after 0ms
 queue.enqueue(asyncTaskB); // resolved/rejected after 2000ms
 queue.enqueue(asyncTaskC); // resolved/rejected after 4000ms
-queue.enqueue(asyncTaskD); // resolved/rejected after 6000ms
+```
+
+### Without automatic start
+
+```javascript
+import Queue from "queue-promise";
+
+const queue = new Queue({
+  concurrent: 1,
+  interval: 2000,
+  start: false,
+});
+
+queue.enqueue(asyncTaskA);
+queue.enqueue(asyncTaskB);
+queue.enqueue(asyncTaskC);
+
+while (queue.shouldRun) {
+  // 1st iteration after 2000ms
+  // 2nd iteration after 4000ms
+  // 3rd iteration after 6000ms
+  const data = await queue.dequeue();
+}
 ```
 
 ## API
@@ -154,6 +177,10 @@ Whether the queue has been forced to stop by calling `Queue.stop`.
 #### **public** `.isEmpty`
 
 Whether the queue is empty, i.e. there's no tasks.
+
+#### **public** `.shouldRun`
+
+Checks whether the queue is not empty and not stopped.
 
 ## Tests
 

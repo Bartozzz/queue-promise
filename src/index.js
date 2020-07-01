@@ -1,6 +1,12 @@
 // @flow
 import EventEmitter from "events";
 
+const State = {
+  IDLE: 0,
+  RUNNING: 1,
+  STOPPED: 2,
+};
+
 /**
  * A small and simple library for promise-based queues. It will execute enqueued
  * functions concurrently at a specified speed. When a task is being resolved or
@@ -58,6 +64,12 @@ export default class Queue extends EventEmitter {
   currentlyHandled = 0;
 
   /**
+   * @type    {State}
+   * @access  public
+   */
+  state: $Values<typeof State> = State.IDLE;
+
+  /**
    * @type    {Object}  options
    * @type    {number}  options.concurrent  How many tasks should be executed in parallel
    * @type    {number}  options.interval    How often should new tasks be executed (in ms)
@@ -69,18 +81,6 @@ export default class Queue extends EventEmitter {
     interval: 500,
     start: true,
   };
-
-  /**
-   * @type    {boolean} Whether the queue is running
-   * @access  public
-   */
-  started = false;
-
-  /**
-   * @type    {boolean} Whether the queue has been forced to stop by calling `Queue.stop`
-   * @access  public
-   */
-  stopped = false;
 
   /**
    * Initializes a new queue instance with provided options.
@@ -112,14 +112,12 @@ export default class Queue extends EventEmitter {
    * @access  public
    */
   start() {
-    if (!this.started && !this.isEmpty) {
-      this.stopped = false;
-      this.started = true;
-
+    if (this.state !== State.RUNNING && !this.isEmpty) {
+      this.state = State.RUNNING;
       this.emit("start");
 
       (async () => {
-        while (!this.isEmpty && !this.stopped) {
+        while (this.shouldRun) {
           await this.dequeue();
         }
       })();
@@ -135,11 +133,9 @@ export default class Queue extends EventEmitter {
    * @access  public
    */
   stop() {
-    this.stopped = true;
-    this.started = false;
-
     clearTimeout(this.timeoutId);
 
+    this.state = State.STOPPED;
     this.emit("stop");
   }
 
@@ -154,13 +150,14 @@ export default class Queue extends EventEmitter {
     this.currentlyHandled -= 1;
 
     if (this.currentlyHandled === 0 && this.isEmpty) {
-      this.emit("end");
       this.stop();
 
       // Finalize doesn't force queue to stop as `Queue.stop()` does. Therefore,
       // new tasks should be still resolved automatically if `options.start` was
       // set to `true` (see `Queue.enqueue`):
-      this.stopped = false;
+      this.state = State.IDLE;
+
+      this.emit("end");
     }
   }
 
@@ -259,7 +256,7 @@ export default class Queue extends EventEmitter {
 
     // Start the queue if the queue should resolve new tasks automatically and
     // hasn't been forced to stop:
-    if (this.options.start && !this.stopped) {
+    if (this.options.start && this.state !== State.STOPPED) {
       this.start();
     }
   }
@@ -290,5 +287,15 @@ export default class Queue extends EventEmitter {
    */
   get isEmpty() {
     return this.tasks.size === 0;
+  }
+
+  /**
+   * Checks whether the queue is not empty and not stopped.
+   *
+   * @type    {boolean}
+   * @access  public
+   */
+  get shouldRun() {
+    return !this.isEmpty && this.state !== State.STOPPED;
   }
 }
