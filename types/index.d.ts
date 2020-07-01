@@ -10,11 +10,17 @@ declare module "queue-promise" {
     start?: boolean;
   }
 
+  interface State {
+    IDLE: 0;
+    RUNNING: 1;
+    STOPPED: 2;
+  }
+
   class Queue extends EventEmitter {
     readonly options: QueueOptions;
-    readonly started: boolean;
-    readonly stopped: boolean;
+    readonly state: State;
     readonly isEmpty: boolean;
+    readonly shouldRun: boolean;
 
     constructor(options?: QueueOptions);
 
