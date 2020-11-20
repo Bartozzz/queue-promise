@@ -65,7 +65,7 @@
     "mocha": "^8.0.1",
     "prettier": "^2.0.2",
     "rimraf": "^3.0.2",
-    "semantic-release": "17.2.3"
+    "semantic-release": "17.2.4"
   },
   "scripts": {
     "pretest": "npm run prepare",
