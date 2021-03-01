@@ -39,7 +39,7 @@
     "@babel/preset-flow": "^7.9.0",
     "@babel/register": "^7.9.0",
     "@commitlint/cli": "^11.0.0",
-    "@commitlint/config-conventional": "^11.0.0",
+    "@commitlint/config-conventional": "^12.0.0",
     "@saithodev/semantic-release-backmerge": "1.2.1",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
@@ -61,11 +61,11 @@
     "flow-bin": "^0.133.0",
     "fs-extra": "^9.0.0",
     "glob": "^7.1.6",
-    "husky": "^4.2.5",
+    "husky": "^5.0.9",
     "mocha": "^8.0.1",
     "prettier": "^2.0.2",
     "rimraf": "^3.0.2",
-    "semantic-release": "17.3.7"
+    "semantic-release": "17.4.0"
   },
   "scripts": {
     "pretest": "npm run prepare",
