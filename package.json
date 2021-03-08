@@ -43,7 +43,7 @@
     "@saithodev/semantic-release-backmerge": "1.2.1",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
-    "@types/node": "14.6.2",
+    "@types/node": "14.14.32",
     "babel-eslint": "^10.1.0",
     "babel-plugin-add-module-exports": "^1.0.2",
     "babel-preset-minify": "^0.5.1",
