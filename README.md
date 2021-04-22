@@ -174,6 +174,10 @@ Whether the queue is running.
 
 Whether the queue has been forced to stop by calling `Queue.stop`.
 
+#### **public** `.size`
+
+Size of the queue.
+
 #### **public** `.isEmpty`
 
 Whether the queue is empty, i.e. there's no tasks.

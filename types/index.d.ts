@@ -19,6 +19,7 @@ declare module "queue-promise" {
   class Queue extends EventEmitter {
     readonly options: QueueOptions;
     readonly state: State;
+    readonly size: number;
     readonly isEmpty: boolean;
     readonly shouldRun: boolean;
 

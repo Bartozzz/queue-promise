@@ -7,6 +7,12 @@ const State = {
   STOPPED: 2,
 };
 
+type Options = {
+  concurrent: number,
+  interval: number,
+  start: boolean,
+};
+
 /**
  * A small and simple library for promise-based queues. It will execute enqueued
  * functions concurrently at a specified speed. When a task is being resolved or
@@ -43,7 +49,7 @@ export default class Queue extends EventEmitter {
    * @type    {number}  Used to generate a unique id for each task
    * @access  private
    */
-  uniqueId = 0;
+  uniqueId: number = 0;
 
   /**
    * @type    {number}
@@ -61,7 +67,7 @@ export default class Queue extends EventEmitter {
    * @type    {number}  Amount of tasks currently handled by the queue
    * @access  private
    */
-  currentlyHandled = 0;
+  currentlyHandled: number = 0;
 
   /**
    * @type    {State}
@@ -76,7 +82,7 @@ export default class Queue extends EventEmitter {
    * @type    {boolean} options.start       Whether it should automatically execute new tasks as soon as they are added
    * @access  public
    */
-  options = {
+  options: Options = {
     concurrent: 5,
     interval: 500,
     start: true,
@@ -91,17 +97,12 @@ export default class Queue extends EventEmitter {
    * @param   {boolean} options.start       Whether it should automatically execute new tasks as soon as they are added
    * @return  {Queue}
    */
-  constructor(options: Object = {}) {
+  constructor(options: Options = {}) {
     super();
 
     this.options = { ...this.options, ...options };
     this.options.interval = parseInt(this.options.interval, 10);
     this.options.concurrent = parseInt(this.options.concurrent, 10);
-
-    // Backward compatibility:
-    if (options.concurrency) {
-      this.options.concurrent = parseInt(options.concurrency, 10);
-    }
   }
 
   /**
@@ -111,7 +112,7 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  public
    */
-  start() {
+  start(): void {
     if (this.state !== State.RUNNING && !this.isEmpty) {
       this.state = State.RUNNING;
       this.emit("start");
@@ -132,7 +133,7 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  public
    */
-  stop() {
+  stop(): void {
     clearTimeout(this.timeoutId);
 
     this.state = State.STOPPED;
@@ -146,7 +147,7 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  private
    */
-  finalize() {
+  finalize(): void {
     this.currentlyHandled -= 1;
 
     if (this.currentlyHandled === 0 && this.isEmpty) {
@@ -171,7 +172,7 @@ export default class Queue extends EventEmitter {
    * @emits   dequeue
    * @access  private
    */
-  async execute() {
+  async execute(): Promise<*> {
     const promises = [];
 
     this.tasks.forEach((promise, id) => {
@@ -217,7 +218,7 @@ export default class Queue extends EventEmitter {
    * @emits   dequeue
    * @access  public
    */
-  dequeue() {
+  dequeue(): Promise<*> {
     const { interval } = this.options;
 
     return new Promise<*>((resolve, reject) => {
@@ -241,7 +242,7 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  public
    */
-  enqueue(tasks: Function | Array<Function>) {
+  enqueue(tasks: Function | Array<Function>): void {
     if (Array.isArray(tasks)) {
       tasks.map((task) => this.enqueue(task));
       return;
@@ -265,7 +266,7 @@ export default class Queue extends EventEmitter {
    * @see     enqueue
    * @access  public
    */
-  add(tasks: Function | Array<Function>) {
+  add(tasks: Function | Array<Function>): void {
     this.enqueue(tasks);
   }
 
@@ -275,8 +276,18 @@ export default class Queue extends EventEmitter {
    * @return  {void}
    * @access  public
    */
-  clear() {
+  clear(): void {
     this.tasks.clear();
+  }
+
+  /**
+   * Size of the queue.
+   *
+   * @type    {number}
+   * @access  public
+   */
+  get size(): number {
+    return this.tasks.size;
   }
 
   /**
@@ -285,8 +296,8 @@ export default class Queue extends EventEmitter {
    * @type    {boolean}
    * @access  public
    */
-  get isEmpty() {
-    return this.tasks.size === 0;
+  get isEmpty(): boolean {
+    return this.size === 0;
   }
 
   /**
@@ -295,7 +306,7 @@ export default class Queue extends EventEmitter {
    * @type    {boolean}
    * @access  public
    */
-  get shouldRun() {
+  get shouldRun(): boolean {
     return !this.isEmpty && this.state !== State.STOPPED;
   }
 }
