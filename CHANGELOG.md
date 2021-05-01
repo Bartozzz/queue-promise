@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/Bartozzz/queue-promise/compare/v2.1.0...v2.2.0) (2021-05-01)
+
+
+### Features
+
+* add queue size property ([d9aca4e](https://github.com/Bartozzz/queue-promise/commit/d9aca4ea3ffb3d3fc2199ad7b20319f06dcff34c))
+
 # [2.1.0](https://github.com/Bartozzz/queue-promise/compare/v2.0.1...v2.1.0) (2020-07-01)
 
 
