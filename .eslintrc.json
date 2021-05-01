@@ -1,7 +1,7 @@
 {
   "parser": "babel-eslint",
 
-  "extends": ["standard", "prettier", "prettier/flowtype", "prettier/standard"],
+  "extends": ["standard", "prettier"],
   "plugins": ["flowtype", "standard", "prettier"],
 
   "env": {

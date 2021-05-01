@@ -10,6 +10,11 @@ queue.state;
 // $ExpectError
 queue.state = false;
 
+// $ExpectType number
+queue.size;
+// $ExpectError
+queue.size = 5;
+
 // $ExpectType boolean
 queue.isEmpty;
 // $ExpectError
