@@ -1,26 +1,22 @@
-name: Release
+name: Release (automatic)
 
 on:
-  push:
-    branches:
-      - master
+  schedule:
+    - cron: "0 0 1 * *"
 
 jobs:
-  release:
-    name: Release package
+  create:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          ref: main
 
       - name: Setup environment
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12
+        uses: actions/setup-node@v2
 
       - name: Cache node modules
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         env:
           cache-name: v1
         with:
