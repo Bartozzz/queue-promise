@@ -1,4 +1,7 @@
 module.exports = {
+  release: {
+    branches: ["main"],
+  },
   plugins: [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -6,6 +9,5 @@ module.exports = {
     "@semantic-release/npm",
     "@semantic-release/git",
     "@semantic-release/github",
-    ["@saithodev/semantic-release-backmerge", { branchName: "development" }],
   ],
 };
