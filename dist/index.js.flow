@@ -223,7 +223,7 @@ export default class Queue extends EventEmitter {
 
     return new Promise<*>((resolve, reject) => {
       if (!this.lastRan) {
-        this.lastRan = -Date.now() + interval;
+        this.lastRan = Date.now() - interval;
       }
 
       clearTimeout(this.timeoutId);
