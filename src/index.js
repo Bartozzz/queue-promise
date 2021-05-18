@@ -55,7 +55,7 @@ export default class Queue extends EventEmitter {
    * @type    {number}
    * @access  private
    */
-  lastRan: number;
+  lastRan: number = 0;
 
   /**
    * @type    {TimeoutID}
@@ -222,15 +222,13 @@ export default class Queue extends EventEmitter {
     const { interval } = this.options;
 
     return new Promise<*>((resolve, reject) => {
-      if (!this.lastRan) {
-        this.lastRan = Date.now() - interval;
-      }
+      const timeout = Math.max(0, interval - (Date.now() - this.lastRan));
 
       clearTimeout(this.timeoutId);
       this.timeoutId = setTimeout(() => {
         this.lastRan = Date.now();
         this.execute().then(resolve);
-      }, interval - (Date.now() - this.lastRan));
+      }, timeout);
     });
   }
 
