@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/Bartozzz/queue-promise/compare/v2.2.0...v2.2.1) (2021-05-18)
+
+
+### Bug Fixes
+
+* **#549:** fix throttling dequeue in browser ([#554](https://github.com/Bartozzz/queue-promise/issues/554)) ([6fefefe](https://github.com/Bartozzz/queue-promise/commit/6fefefe41e44387529d2ebab7320bfc73355b43a))
+
 # [2.2.0](https://github.com/Bartozzz/queue-promise/compare/v2.1.0...v2.2.0) (2021-05-01)
 
 
