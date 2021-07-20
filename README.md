@@ -166,13 +166,11 @@ Forces the queue to stop. New tasks will not be executed automatically even if `
 
 Removes all tasks from the queue.
 
-#### **public** `.started`
+#### **public** `.state`
 
-Whether the queue is running.
-
-#### **public** `.stopped`
-
-Whether the queue has been forced to stop by calling `Queue.stop`.
+- `0`: Idle state;
+- `1`: Running state;
+- `2`: Stopped state;
 
 #### **public** `.size`
 
