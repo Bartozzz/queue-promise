@@ -28,7 +28,7 @@ declare module "queue-promise" {
     start(): void;
     stop(): void;
     dequeue(): any;
-    enqueue(tasks: TaskFactory | ReadonlyArray<TaskFactory>): void;
+    enqueue(tasks: TaskFactory | ReadonlyArray<TaskFactory>): number[];
     add(tasks: TaskFactory | ReadonlyArray<TaskFactory>): void;
     clear(): void;
   }
