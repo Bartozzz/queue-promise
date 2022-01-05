@@ -237,7 +237,7 @@ export default class Queue extends EventEmitter {
    *
    * @param   {Function|Array}  tasks     Tasks to add to the queue
    * @throws  {Error}                     When task is not a function
-   * @return  {void}
+   * @return  {number[]}                  Array of task ids
    * @access  public
    */
   enqueue(tasks: Function | Array<Function>): number[] {
