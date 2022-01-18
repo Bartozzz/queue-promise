@@ -192,7 +192,7 @@ export default class Queue extends EventEmitter {
               return error;
             })
             .finally(() => {
-              this.emit("dequeue");
+              this.emit("dequeue", id);
               this.finalize();
             })
         );
@@ -237,13 +237,16 @@ export default class Queue extends EventEmitter {
    *
    * @param   {Function|Array}  tasks     Tasks to add to the queue
    * @throws  {Error}                     When task is not a function
-   * @return  {void}
+   * @return  {number[]}                  Array of task ids
    * @access  public
    */
-  enqueue(tasks: Function | Array<Function>): void {
+  enqueue(tasks: Function | Array<Function>): number[] {
     if (Array.isArray(tasks)) {
-      tasks.map((task) => this.enqueue(task));
-      return;
+      const emptyNumberArray: number[] = [];
+      const taskIds = emptyNumberArray.concat(
+        tasks.map((task) => this.enqueue(task)[0])
+      );
+      return taskIds;
     }
 
     if (typeof tasks !== "function") {
@@ -258,6 +261,8 @@ export default class Queue extends EventEmitter {
     if (this.options.start && this.state !== State.STOPPED) {
       this.start();
     }
+
+    return [this.uniqueId];
   }
 
   /**
