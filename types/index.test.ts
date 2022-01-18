@@ -40,11 +40,11 @@ queue.stop();
   const [e, f, g] = await queue.dequeue();
 })();
 
-// $ExpectType void
+// $ExpectType number[]
 queue.enqueue(() => resolve("Success"));
-// $ExpectType void
+// $ExpectType number[]
 queue.enqueue(() => reject("Error"));
-// $ExpectType void
+// $ExpectType number[]
 queue.enqueue([() => reject("Success"), () => reject("Error")]);
 // $ExpectError
 queue.enqueue("ab");
