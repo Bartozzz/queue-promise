@@ -7,3 +7,7 @@
 [lints]
 
 [options]
+
+[declarations]
+<PROJECT_ROOT>/node_modules/resolve/.*
+
